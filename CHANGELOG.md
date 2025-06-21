@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.2.0 (2025-06-21)
+
+### ✨ Features
+
+- Implement UTC clock
+  ([`f61d1e5`](https://github.com/adriamontoto/clock-pattern/commit/f61d1e57d5fe02a9c48e2882446b14a417ab7cc7))
+
+
 ## v0.1.0 (2025-06-21)
 
 ### ✨ Features
