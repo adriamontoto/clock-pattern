@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.3.0 (2025-06-21)
+
+### ✨ Features
+
+- Implement fixed time clock
+  ([`d4aab23`](https://github.com/adriamontoto/clock-pattern/commit/d4aab23e6910a22e76064954faeb58f0d13e471b))
+
+
 ## v0.2.0 (2025-06-21)
 
 ### ✨ Features
