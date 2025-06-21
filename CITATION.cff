@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+title: Clock Pattern
+message: >
+  If you use this software, please cite it using the metadata below.
+type: software
+authors:
+  - given-names: Adrià
+    family-names: Montoto
+repository-code: https://github.com/adriamontoto/clock-pattern
+url: https://pypi.org/project/clock-pattern
+abstract: >
+  The Clock Pattern is a Python package that turns time into an
+  injectable dependency. By replacing ad-hoc datetime.now() calls
+  with a swappable Clock interface you unlock deterministic tests
+  and decouple business logic from the OS clock.
+keywords:
+  - python
+  - clock
+  - dependency-injection
+  - domain-driven-design
+license: MIT
