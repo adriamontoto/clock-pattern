@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.4.0 (2025-06-21)
+
+### ✨ Features
+
+- Implement mock clock
+  ([`0876d5b`](https://github.com/adriamontoto/clock-pattern/commit/0876d5bcead93748ec855d87eec260b8d3677c38))
+
+
 ## v0.3.0 (2025-06-21)
 
 ### ✨ Features
