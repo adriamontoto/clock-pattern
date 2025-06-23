@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.5.0 (2025-06-23)
+
+### ✨ Features
+
+- Improve package imports
+  ([`30a5c71`](https://github.com/adriamontoto/clock-pattern/commit/30a5c71cfcc15520239c8bd1f1efabc0ce673bb8))
+
+
 ## v0.4.0 (2025-06-21)
 
 ### ✨ Features
