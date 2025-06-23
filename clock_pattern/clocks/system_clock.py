@@ -23,7 +23,7 @@ class SystemClock(Clock):
 
     Example:
     ```python
-    from clock_pattern.clocks import SystemClock
+    from clock_pattern import SystemClock
 
     clock = SystemClock()
     print(clock.now())
@@ -48,7 +48,7 @@ class SystemClock(Clock):
 
         Example:
         ```python
-        from clock_pattern.clocks import SystemClock
+        from clock_pattern import SystemClock
 
         clock = SystemClock()
         print(clock.now())
@@ -72,7 +72,7 @@ class SystemClock(Clock):
 
         Example:
         ```python
-        from clock_pattern.clocks import SystemClock
+        from clock_pattern import SystemClock
 
         clock = SystemClock()
         print(clock.now())
@@ -91,7 +91,7 @@ class SystemClock(Clock):
 
         Example:
         ```python
-        from clock_pattern.clocks import SystemClock
+        from clock_pattern import SystemClock
 
         clock = SystemClock()
         print(clock.now())
@@ -110,7 +110,7 @@ class SystemClock(Clock):
 
         Example:
         ```python
-        from clock_pattern.clocks import SystemClock
+        from clock_pattern import SystemClock
 
         clock = SystemClock()
         print(clock.timezone)

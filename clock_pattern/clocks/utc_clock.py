@@ -13,7 +13,7 @@ class UtcClock(SystemClock):
 
     Example:
     ```python
-    from clock_pattern.clocks import UtcClock
+    from clock_pattern import UtcClock
 
     clock = UtcClock()
     print(clock.now())
@@ -27,7 +27,7 @@ class UtcClock(SystemClock):
 
         Example:
         ```python
-        from clock_pattern.clocks import UtcClock
+        from clock_pattern import UtcClock
 
         clock = UtcClock()
         print(clock.now())
