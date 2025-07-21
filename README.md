@@ -18,6 +18,9 @@
     <a href="https://pepy.tech/projects/clock-pattern" target="_blank">
         <img src="https://static.pepy.tech/badge/clock-pattern/month" alt="Package Downloads">
     </a>
+    <a href="https://deepwiki.com/adriamontoto/clock-pattern" target="_blank">
+        <img src="https://img.shields.io/badge/DeepWiki-adriamontoto%2Fclock--pattern-blue.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAyCAYAAAAnWDnqAAAAAXNSR0IArs4c6QAAA05JREFUaEPtmUtyEzEQhtWTQyQLHNak2AB7ZnyXZMEjXMGeK/AIi+QuHrMnbChYY7MIh8g01fJoopFb0uhhEqqcbWTp06/uv1saEDv4O3n3dV60RfP947Mm9/SQc0ICFQgzfc4CYZoTPAswgSJCCUJUnAAoRHOAUOcATwbmVLWdGoH//PB8mnKqScAhsD0kYP3j/Yt5LPQe2KvcXmGvRHcDnpxfL2zOYJ1mFwrryWTz0advv1Ut4CJgf5uhDuDj5eUcAUoahrdY/56ebRWeraTjMt/00Sh3UDtjgHtQNHwcRGOC98BJEAEymycmYcWwOprTgcB6VZ5JK5TAJ+fXGLBm3FDAmn6oPPjR4rKCAoJCal2eAiQp2x0vxTPB3ALO2CRkwmDy5WohzBDwSEFKRwPbknEggCPB/imwrycgxX2NzoMCHhPkDwqYMr9tRcP5qNrMZHkVnOjRMWwLCcr8ohBVb1OMjxLwGCvjTikrsBOiA6fNyCrm8V1rP93iVPpwaE+gO0SsWmPiXB+jikdf6SizrT5qKasx5j8ABbHpFTx+vFXp9EnYQmLx02h1QTTrl6eDqxLnGjporxl3NL3agEvXdT0WmEost648sQOYAeJS9Q7bfUVoMGnjo4AZdUMQku50McDcMWcBPvr0SzbTAFDfvJqwLzgxwATnCgnp4wDl6Aa+Ax283gghmj+vj7feE2KBBRMW3FzOpLOADl0Isb5587h/U4gGvkt5v60Z1VLG8BhYjbzRwyQZemwAd6cCR5/XFWLYZRIMpX39AR0tjaGGiGzLVyhse5C9RKC6ai42ppWPKiBagOvaYk8lO7DajerabOZP46Lby5wKjw1HCRx7p9sVMOWGzb/vA1hwiWc6jm3MvQDTogQkiqIhJV0nBQBTU+3okKCFDy9WwferkHjtxib7t3xIUQtHxnIwtx4mpg26/HfwVNVDb4oI9RHmx5WGelRVlrtiw43zboCLaxv46AZeB3IlTkwouebTr1y2NjSpHz68WNFjHvupy3q8TFn3Hos2IAk4Ju5dCo8B3wP7VPr/FGaKiG+T+v+TQqIrOqMTL1VdWV1DdmcbO8KXBz6esmYWYKPwDL5b5FA1a0hwapHiom0r/cKaoqr+27/XcrS5UwSMbQAAAABJRU5ErkJggg==" alt="Project Documentation">
+    </a>
 </p>
 
 The **Clock Pattern** is a Python 🐍 package that turns time into an injectable dependency 🧩. By replacing ad-hoc datetime.now() calls with a swappable Clock interface 🕰️ you unlock deterministic tests 🧪, decouple business logic from the OS clock, and gain the freedom to swap in high-precision or logical clocks without touching domain code.
@@ -26,6 +29,7 @@ The **Clock Pattern** is a Python 🐍 package that turns time into an injectabl
 ## Table of Contents
 
 - [📥 Installation](#installation)
+- [📚 Documentation](#documentation)
 - [💻 Utilization](#utilization)
   - [📚 Available Clocks](#available-clocks)
   - [🎄 Real-Life Case: Christmas Detector Service](#real-life-case-christmas-detector-service)
@@ -45,6 +49,16 @@ You can install **Clock Pattern** using `pip`:
 ```bash
 pip install clock-pattern
 ```
+
+<p align="right">
+    <a href="#readme-top">🔼 Back to top</a>
+</p><br><br>
+
+<a name="documentation"></a>
+
+## 📚 Documentation
+
+This [project's documentation](https://deepwiki.com/adriamontoto/clock-pattern) is powered by DeepWiki, which provides a comprehensive overview of the **Clock Pattern** and its usage.
 
 <p align="right">
     <a href="#readme-top">🔼 Back to top</a>
