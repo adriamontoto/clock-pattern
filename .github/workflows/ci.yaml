@@ -520,7 +520,7 @@ jobs:
 
       - name: 🔖 Semantic Release
         id: released
-        uses: python-semantic-release/python-semantic-release@4d4cb0ab842247caea1963132c242c62aab1e4d5 # v10.0.2
+        uses: python-semantic-release/python-semantic-release@eb841f9a95650921ff7e7fc94208b6560366a854 # v10.0.2
         with:
           build: false
           push: true
