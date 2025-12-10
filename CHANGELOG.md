@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.6.0 (2025-12-10)
+
+### ✨ Features
+
+- Support python 3.14
+  ([`85c3c3f`](https://github.com/adriamontoto/clock-pattern/commit/85c3c3f6fd7c69c276e2fb950bef09670f6d00e4))
+
+
 ## v0.5.0 (2025-06-23)
 
 ### ✨ Features
