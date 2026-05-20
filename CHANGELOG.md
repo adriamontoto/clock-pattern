@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.7.0 (2026-05-20)
+
+### ✨ Features
+
+- Introduce AGENTS.md
+  ([`f4ad97e`](https://github.com/adriamontoto/clock-pattern/commit/f4ad97e1363f6fb3ccc50e0056d6ecc012861638))
+
+
 ## v0.6.0 (2025-12-10)
 
 ### ✨ Features
