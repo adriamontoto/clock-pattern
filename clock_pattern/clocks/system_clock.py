@@ -1,5 +1,5 @@
 """
-SystemClock module.
+Timezone-aware clock backed by the operating system time.
 """
 
 from sys import version_info
@@ -19,15 +19,19 @@ from clock_pattern.models.clock import Clock
 
 class SystemClock(Clock):
     """
-    SystemClock class is responsible of retrieving the current date/datetime with the provided timezone.
+    Return the current system datetime and date in a configured timezone.
+
+    `SystemClock` is the general-purpose production clock. It accepts either an IANA timezone string supported by
+    `zoneinfo.ZoneInfo` or a `tzinfo` instance. The default timezone is UTC, so datetimes are timezone-aware unless the
+    provided timezone object has different behavior.
 
     Example:
     ```python
     from clock_pattern import SystemClock
 
-    clock = SystemClock()
+    clock = SystemClock(timezone='Europe/Madrid')
     print(clock.now())
-    # >>> 2025-06-16 13:57:26.210964+00:00
+    # >>> 2025-06-16 15:57:26.210964+02:00
     ```
     """
 
@@ -35,22 +39,23 @@ class SystemClock(Clock):
 
     def __init__(self, *, timezone: str | tzinfo = UTC) -> None:
         """
-        SystemClock constructor is responsible to store which `timezone` the user wants to use when retrieving the
-        current date/datetime.
+        Create a clock that reads system time in `timezone`.
+
+        The timezone may be a valid timezone name such as `'UTC'` or `'Europe/Madrid'`, or a `tzinfo` object accepted by
+        the project value-object validators. String values must be non-empty, trimmed, and valid for `ZoneInfo`.
 
         Args:
-            timezone: (str | tzinfo, optional): Timezone of the date/datetime to retrieve. Default to UTC.
+            timezone: Timezone used to produce `now()` and `today()`. Defaults to UTC.
 
         Raises:
-            TypeError: If `timezone` is not of type tzinfo.
-            TypeError: If `timezone` is not of type string.
+            TypeError: If `timezone` is not a string or `tzinfo` instance.
             ValueError: If `timezone` is not a valid timezone.
 
         Example:
         ```python
         from clock_pattern import SystemClock
 
-        clock = SystemClock()
+        clock = SystemClock(timezone='UTC')
         print(clock.now())
         # >>> 2025-06-16 13:57:26.210964+00:00
         ```
@@ -65,10 +70,10 @@ class SystemClock(Clock):
     @override
     def now(self) -> datetime:
         """
-        Retrieve the current datetime (now).
+        Retrieve the current timezone-aware system datetime.
 
         Returns:
-            datetime: The current datetime.
+            datetime: Current datetime in the configured timezone.
 
         Example:
         ```python
@@ -84,17 +89,20 @@ class SystemClock(Clock):
     @override
     def today(self) -> date:
         """
-        Retrieve the current date (today).
+        Retrieve the current date in the configured timezone.
+
+        The returned date is derived from `datetime.now(tz=timezone).date()`, so it follows the clock timezone rather
+        than the machine's local timezone.
 
         Returns:
-            date: The current date.
+            date: Current date in the configured timezone.
 
         Example:
         ```python
         from clock_pattern import SystemClock
 
         clock = SystemClock()
-        print(clock.now())
+        print(clock.today())
         # >>> 2025-06-16
         ```
         """
@@ -103,10 +111,10 @@ class SystemClock(Clock):
     @property
     def timezone(self) -> tzinfo:
         """
-        Retrieve the timezone of the clock.
+        Retrieve the timezone used by the clock.
 
         Returns:
-            tzinfo: The timezone of the clock.
+            tzinfo: Timezone used by `now()` and `today()`.
 
         Example:
         ```python

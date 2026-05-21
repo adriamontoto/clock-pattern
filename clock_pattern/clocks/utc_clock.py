@@ -1,5 +1,5 @@
 """
-UtcClock module.
+UTC production clock implementation.
 """
 
 from datetime import UTC
@@ -9,7 +9,10 @@ from .system_clock import SystemClock
 
 class UtcClock(SystemClock):
     """
-    UtcClock class is responsible of retrieving the current UTC date/datetime.
+    Return the current system datetime and date in UTC.
+
+    `UtcClock` is a convenience specialization of `SystemClock` for applications that standardize persistence,
+    messaging, logging, or domain timestamps on UTC.
 
     Example:
     ```python
@@ -23,7 +26,7 @@ class UtcClock(SystemClock):
 
     def __init__(self) -> None:
         """
-        UtcClock constructor.
+        Create a system-backed clock fixed to UTC.
 
         Example:
         ```python

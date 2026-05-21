@@ -1,5 +1,5 @@
 """
-MockClock module.
+Testing clock with prepared return values and call assertions.
 """
 
 from sys import version_info
@@ -20,7 +20,11 @@ from clock_pattern.models.clock import Clock
 
 class MockClock(Clock):
     """
-    MockModel is responsible of mocking Clock class implementation for testing purposes.
+    Test double for `Clock` with explicit return values and interaction assertions.
+
+    `MockClock` is useful when tests need both deterministic time and proof that a service requested `now()` or
+    `today()`. Return values must be prepared before calling the corresponding method. Naive datetimes passed to
+    `prepare_now_method_return_value()` are normalized to UTC.
 
     Example:
     ```python
@@ -46,7 +50,7 @@ class MockClock(Clock):
 
     def __init__(self) -> None:
         """
-        MockClock constructor.
+        Create a mock clock with no prepared return values and no recorded calls.
 
         Example:
         ```python
@@ -72,14 +76,15 @@ class MockClock(Clock):
     @override
     def now(self) -> datetime:
         """
-        Retrieve the current datetime (now). Use `MockClock.prepare_now_method_return_value` to prepare the return value
-        for this method.
+        Retrieve the prepared datetime and record a `now()` call.
+
+        Call `prepare_now_method_return_value()` before using this method.
 
         Raises:
-            TypeError: If `now` method return value is not configured.
+            TypeError: If the `now()` return value has not been prepared.
 
         Returns:
-            datetime: The current datetime.
+            datetime: Prepared datetime.
 
         Example:
         ```python
@@ -105,11 +110,12 @@ class MockClock(Clock):
 
     def prepare_now_method_return_value(self, *, now: datetime) -> None:
         """
-        Prepare now method to return the provided datetime `now`. If the provided datetime `now` has not timezone UTC
-        will be set.
+        Prepare the datetime returned by `now()`.
+
+        If `now` is naive, UTC is added as its timezone. A timezone-aware datetime is preserved as provided.
 
         Args:
-            now (datetime): Datetime to return.
+            now: Datetime returned by the next and subsequent `now()` calls.
 
         Raises:
             TypeError: If `now` is not of type datetime.
@@ -139,7 +145,7 @@ class MockClock(Clock):
 
     def assert_now_method_was_called_once(self) -> None:
         """
-        Assert that the now method was called once.
+        Assert that `now()` was called exactly once.
 
         Example:
         ```python
@@ -161,7 +167,7 @@ class MockClock(Clock):
 
     def assert_now_method_was_not_called(self) -> None:
         """
-        Assert that the now method was not called.
+        Assert that `now()` was not called.
 
         Example:
         ```python
@@ -174,7 +180,7 @@ class MockClock(Clock):
 
         clock.prepare_today_method_return_value(today=return_date)
         print(clock.today())
-        # >>> 2025-06-16
+        # >>> 1999-01-01
 
         clock.assert_now_method_was_not_called()
         ```
@@ -184,14 +190,15 @@ class MockClock(Clock):
     @override
     def today(self) -> date:
         """
-        Retrieve the current date (today). Use `MockClock.prepare_today_method_return_value` to prepare the return value
-        for this method.
+        Retrieve the prepared date and record a `today()` call.
+
+        Call `prepare_today_method_return_value()` before using this method.
 
         Raises:
-            ValueError: If `today` method return value is not configured.
+            TypeError: If the `today()` return value has not been prepared.
 
         Returns:
-            date: The current date.
+            date: Prepared date.
 
         Example:
         ```python
@@ -204,7 +211,7 @@ class MockClock(Clock):
 
         clock.prepare_today_method_return_value(today=return_date)
         print(clock.today())
-        # >>> 2025-06-16
+        # >>> 1999-01-01
 
         clock.assert_today_method_was_called_once()
         ```
@@ -217,10 +224,10 @@ class MockClock(Clock):
 
     def prepare_today_method_return_value(self, *, today: date) -> None:
         """
-        Prepare today method to return the provided date `today`.
+        Prepare the date returned by `today()`.
 
         Args:
-            today (date): Date to return.
+            today: Date returned by the next and subsequent `today()` calls.
 
         Raises:
             TypeError: If `today` is not of type date.
@@ -236,7 +243,7 @@ class MockClock(Clock):
 
         clock.prepare_today_method_return_value(today=return_date)
         print(clock.today())
-        # >>> 2025-06-16
+        # >>> 1999-01-01
 
         clock.assert_today_method_was_called_once()
         ```
@@ -246,7 +253,7 @@ class MockClock(Clock):
 
     def assert_today_method_was_called_once(self) -> None:
         """
-        Assert that the today method was called once.
+        Assert that `today()` was called exactly once.
 
         Example:
         ```python
@@ -259,7 +266,7 @@ class MockClock(Clock):
 
         clock.prepare_today_method_return_value(today=return_date)
         print(clock.today())
-        # >>> 2025-06-16
+        # >>> 1999-01-01
 
         clock.assert_today_method_was_called_once()
         ```
@@ -268,7 +275,7 @@ class MockClock(Clock):
 
     def assert_today_method_was_not_called(self) -> None:
         """
-        Assert that the today method was not called.
+        Assert that `today()` was not called.
 
         Example:
         ```python

@@ -1,5 +1,5 @@
 """
-FixedClock module.
+Deterministic clock that always returns the same instant.
 """
 
 from sys import version_info
@@ -18,8 +18,10 @@ from clock_pattern.models.clock import Clock
 
 class FixedClock(Clock):
     """
-    MockModel is responsible for retrieving the date/datetime provided when `FixedClock` initialization. Use `MockClock`
-    for better testing features.
+    Return a fixed datetime and the date derived from it.
+
+    `FixedClock` is useful when a test only needs stable time. Naive datetimes are normalized to UTC during
+    initialization. Use `MockClock` when a test also needs to assert whether `now()` or `today()` was called.
 
     Example:
     ```python
@@ -38,14 +40,15 @@ class FixedClock(Clock):
 
     def __init__(self, *, instant: datetime) -> None:
         """
-        FixedClock constructor is used to provided which date/datetime `instance` will be retrieved. If the provided
-        datetime `instant` has not timezone UTC will be set.
+        Create a fixed clock for `instant`.
+
+        If `instant` is naive, UTC is added as its timezone. A timezone-aware `instant` is preserved as provided.
 
         Args:
-            instant (datetime): The datetime that will be retrieved.
+            instant: Datetime returned by `now()` and used by `today()`.
 
         Raises:
-            ValueError: If `instant` is not of type datetime.
+            TypeError: If `instant` is not a datetime.
 
         Example:
         ```python
@@ -69,10 +72,10 @@ class FixedClock(Clock):
     @override
     def now(self) -> datetime:
         """
-        Retrieve the current datetime (now).
+        Retrieve the fixed datetime.
 
         Returns:
-            datetime: The current datetime.
+            datetime: The configured instant.
 
         Example:
         ```python
@@ -91,10 +94,10 @@ class FixedClock(Clock):
     @override
     def today(self) -> date:
         """
-        Retrieve the current date (today).
+        Retrieve the date portion of the fixed datetime.
 
         Returns:
-            date: The current date.
+            date: Date derived from the configured instant.
 
         Example:
         ```python

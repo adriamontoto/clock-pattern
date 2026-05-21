@@ -23,16 +23,22 @@
     </a>
 </p>
 
-The **Clock Pattern** is a Python 🐍 package that turns time into an injectable dependency 🧩. By replacing ad-hoc datetime.now() calls with a swappable Clock interface 🕰️ you unlock deterministic tests 🧪, decouple business logic from the OS clock, and gain the freedom to swap in high-precision or logical clocks without touching domain code.
+The **Clock Pattern** is a Python 🐍 package that turns time into an injectable dependency 🧩. Instead of scattering
+`datetime.now()` or `date.today()` through application code, domain services depend on a small `Clock` interface. That
+keeps time-sensitive logic deterministic in tests, makes timezone choices explicit, and lets production code swap clock
+implementations without touching business rules.
 <br><br>
 
 ## Table of Contents
 
 - [📥 Installation](#installation)
 - [📚 Documentation](#documentation)
-- [💻 Utilization](#utilization)
-  - [📚 Available Clocks](#available-clocks)
-  - [🎄 Real-Life Case: Christmas Detector Service](#real-life-case-christmas-detector-service)
+- [⚡ Quick Start](#quick-start)
+- [🧩 Why Inject a Clock?](#why-inject-a-clock)
+- [📚 Available Clocks](#available-clocks)
+- [🌍 Timezone Behavior](#timezone-behavior)
+- [🧪 Testing Time-Sensitive Code](#testing-time-sensitive-code)
+- [🎄 Real-Life Case: Christmas Detector Service](#real-life-case-christmas-detector-service)
 - [🤝 Contributing](#contributing)
 - [🔑 License](#license)
 
@@ -58,29 +64,78 @@ pip install clock-pattern
 
 ## 📚 Documentation
 
-This [project's documentation](https://deepwiki.com/adriamontoto/clock-pattern) is powered by DeepWiki, which provides a comprehensive overview of the **Clock Pattern** and its usage.
+The root README is the entry point. Deeper guides live in this repository and are linked here:
+
+- [`docs/README.md`](docs/README.md): Documentation hub.
+- [`docs/usage/README.md`](docs/usage/README.md): Core usage patterns and service composition.
+- [`docs/timezones/README.md`](docs/timezones/README.md): Timezone behavior, UTC defaults, and date-boundary guidance.
+- [`docs/testing/README.md`](docs/testing/README.md): `FixedClock`, `MockClock`, and deterministic test patterns.
+
+This [project's DeepWiki documentation](https://deepwiki.com/adriamontoto/clock-pattern) is also available for generated
+repository navigation.
 
 <p align="right">
     <a href="#readme-top">🔼 Back to top</a>
 </p><br><br>
 
-<a name="utilization"></a>
+<a name="quick-start"></a>
 
-## 💻 Utilization
+## ⚡ Quick Start
 
-The **Clock Pattern** library is designed to be straightforward. Simply import the desired clock and use its `now()` or `today()` methods to get the current datetime/date. This approach allows for easy dependency injection and testing.
-
-Here is a basic example of how to use the [`SystemClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/system_clock.py) clock:
+Inject a `Clock` into code that needs the current time. Production code can pass a real clock, while tests can pass a
+fixed or mock clock.
 
 ```python
-from datetime import timezone
+from clock_pattern import Clock, UtcClock
 
+
+class TimestampService:
+    def __init__(self, *, clock: Clock) -> None:
+        self._clock = clock
+
+    def issued_at(self) -> str:
+        return self._clock.now().isoformat()
+
+
+service = TimestampService(clock=UtcClock())
+print(service.issued_at())
+```
+
+Use [`SystemClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/system_clock.py) when
+you need a specific timezone:
+
+```python
 from clock_pattern import SystemClock
 
-clock = SystemClock(timezone=timezone.utc)
+clock = SystemClock(timezone='Europe/Madrid')
 print(clock.now())
-# >>> 2025-06-16 13:57:26.210964+00:00
+# >>> 2025-06-16 15:57:26.210964+02:00
 ```
+
+<p align="right">
+    <a href="#readme-top">🔼 Back to top</a>
+</p><br><br>
+
+<a name="why-inject-a-clock"></a>
+
+## 🧩 Why Inject a Clock?
+
+Time is global state. Reading it directly from the operating system makes behavior depend on the moment a test happens
+to run, the machine timezone, daylight-saving transitions, and the speed of the test suite.
+
+Clock Pattern keeps those decisions explicit:
+
+- Domain code depends on `Clock`, not on Python's global datetime functions.
+- Tests can choose exact dates and datetimes without monkeypatching built-in modules.
+- Production wiring decides whether the application uses UTC or another timezone.
+- Custom clocks can be introduced for logical time, simulation, replay, or high-precision infrastructure.
+
+The package exposes two methods:
+
+| Method | Returns | Typical use |
+| --- | --- | --- |
+| `now()` | `datetime` | Timestamps, expiration windows, audit fields, elapsed-time calculations. |
+| `today()` | `date` | Calendar rules, billing days, holiday checks, date-only decisions. |
 
 <p align="right">
     <a href="#readme-top">🔼 Back to top</a>
@@ -92,10 +147,85 @@ print(clock.now())
 
 The package offers several clock implementations to suit different needs:
 
-- [`clock_pattern.SystemClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/system_clock.py): The standard clock implementation that returns the system's current datetime/date with the provided timezone.
-- [`clock_pattern.UtcClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/utc_clock.py): A clock implementation that returns the system's current datetime/date in UTC. Ideal for production environments.
-- [`clock_pattern.clocks.testing.FixedClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/testing/fixed_clock.py): A clock that always returns a fixed, preset datetime/date. It is perfect for basic testing as it allows you to control the datetime/date within your test environment, ensuring deterministic results.
-- [`clock_pattern.clocks.testing.MockClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/testing/mock_clock.py): A clock that allows you to mock the system clock. It is perfect for more complex testing as it allows you to control the datetime/date within your test environment and if or not the methods are called or not.
+| Clock | Import path | Purpose |
+| --- | --- | --- |
+| [`Clock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/models/clock.py) | `from clock_pattern import Clock` | Abstract contract for code that needs `now()` or `today()`. |
+| [`SystemClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/system_clock.py) | `from clock_pattern import SystemClock` | Production clock backed by system time in a configured timezone. |
+| [`UtcClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/utc_clock.py) | `from clock_pattern import UtcClock` | Production clock fixed to UTC. |
+| [`FixedClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/testing/fixed_clock.py) | `from clock_pattern.clocks.testing import FixedClock` | Test clock that always returns the same datetime and derived date. |
+| [`MockClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/testing/mock_clock.py) | `from clock_pattern.clocks.testing import MockClock` | Test clock with prepared return values and call assertions. |
+
+Use the top-level package for production clocks and `clock_pattern.clocks.testing` for test-only clocks.
+
+<p align="right">
+    <a href="#readme-top">🔼 Back to top</a>
+</p><br><br>
+
+<a name="timezone-behavior"></a>
+
+## 🌍 Timezone Behavior
+
+`SystemClock` accepts either an IANA timezone string or a `tzinfo` instance. It stores the timezone with `ZoneInfo` and
+uses it for both `now()` and `today()`.
+
+```python
+from datetime import UTC
+
+from clock_pattern import SystemClock
+
+utc_clock = SystemClock(timezone=UTC)
+madrid_clock = SystemClock(timezone='Europe/Madrid')
+
+print(utc_clock.timezone)
+# >>> UTC
+print(madrid_clock.timezone)
+# >>> Europe/Madrid
+```
+
+`UtcClock` is a convenience clock for the common production choice of UTC.
+
+`today()` is calculated in the clock timezone. Around midnight, `SystemClock(timezone='UTC').today()` and
+`SystemClock(timezone='America/New_York').today()` may return different dates. For more details, see
+[`docs/timezones/README.md`](docs/timezones/README.md).
+
+<p align="right">
+    <a href="#readme-top">🔼 Back to top</a>
+</p><br><br>
+
+<a name="testing-time-sensitive-code"></a>
+
+## 🧪 Testing Time-Sensitive Code
+
+Use `FixedClock` when the test only needs a stable instant:
+
+```python
+from datetime import datetime
+
+from clock_pattern.clocks.testing import FixedClock
+
+clock = FixedClock(instant=datetime(year=2025, month=1, day=1, hour=10, minute=30))
+
+assert clock.now().isoformat() == '2025-01-01T10:30:00+00:00'
+assert clock.today().isoformat() == '2025-01-01'
+```
+
+Use `MockClock` when the test also needs to prove that time was requested:
+
+```python
+from datetime import date
+
+from clock_pattern.clocks.testing import MockClock
+
+clock = MockClock()
+clock.prepare_today_method_return_value(today=date(year=2025, month=1, day=7))
+
+assert clock.today() == date(year=2025, month=1, day=7)
+clock.assert_today_method_was_called_once()
+clock.assert_now_method_was_not_called()
+```
+
+More testing recipes are available in [`docs/testing/README.md`](docs/testing/README.md).
+
 <p align="right">
     <a href="#readme-top">🔼 Back to top</a>
 </p><br><br>
@@ -104,7 +234,10 @@ The package offers several clock implementations to suit different needs:
 
 ## 🎄 Real-Life Case: Christmas Detector Service
 
-Below is an example of a real-life scenario where Clock Pattern can create clean and testable code. We have a `ChristmasDetectorService` that checks if the curren date falls within a specific Christmas holiday range. Using the Clock Pattern, in this case [`UtcClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/utc_clock.py) and [`MockClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/testing/mock_clock.py), we can decouple the service from the python `datetime.now()` and `datetime.today()` functions, making it easy to test for different dates without changing the system's time.
+This service checks whether the current date falls within a Christmas holiday range. The service depends on `Clock`, so
+production code can use [`UtcClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/utc_clock.py)
+and tests can use [`MockClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/testing/mock_clock.py)
+without changing the service.
 
 ```python
 from datetime import date
@@ -114,41 +247,41 @@ from clock_pattern.clocks.testing import MockClock
 
 
 class ChristmasDetectorService:
-    def __init__(self, clock: Clock) -> None:
-        self.clock = clock
-        self.christmas_start = date(year=2024, month=12, day=24)
-        self.christmas_end = date(year=2025, month=1, day=6)
+    def __init__(self, *, clock: Clock) -> None:
+        self._clock = clock
+        self._christmas_start = date(year=2024, month=12, day=24)
+        self._christmas_end = date(year=2025, month=1, day=6)
 
     def is_christmas(self) -> bool:
-        return self.christmas_start <= self.clock.today() <= self.christmas_end
+        return self._christmas_start <= self._clock.today() <= self._christmas_end
 
 
 clock = UtcClock()
-christmas_detector_service = ChristmasDetectorService(clock=clock)
+service = ChristmasDetectorService(clock=clock)
 
-print(christmas_detector_service.is_christmas())
+print(service.is_christmas())
 # >>> False
 
 
 def test_christmas_detector_is_christmas() -> None:
     clock = MockClock()
-    christmas_detector_service = ChristmasDetectorService(clock=clock)
+    service = ChristmasDetectorService(clock=clock)
 
     today = date(year=2024, month=12, day=25)
     clock.prepare_today_method_return_value(today=today)
 
-    assert christmas_detector_service.is_christmas() is True
+    assert service.is_christmas() is True
     clock.assert_today_method_was_called_once()
 
 
 def test_christmas_detector_is_not_christmas() -> None:
     clock = MockClock()
-    christmas_detector_service = ChristmasDetectorService(clock=clock)
+    service = ChristmasDetectorService(clock=clock)
 
     today = date(year=2025, month=1, day=7)
     clock.prepare_today_method_return_value(today=today)
 
-    assert christmas_detector_service.is_christmas() is False
+    assert service.is_christmas() is False
     clock.assert_today_method_was_called_once()
 ```
 
