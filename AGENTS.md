@@ -21,7 +21,8 @@ This is a single-package Python project, not a monorepo. It supports Python `>=3
 Run commands from the repository root.
 
 - Show available project commands: `make help`
-- Create the virtual environment, install all dependency groups, and install hooks: `make setup`
+- Create the default virtual environment, install all dependency groups, and install hooks: `make setup`
+- Create all configured virtual environments: `make setup-all`
 - Install all dependency groups into an existing environment: `make install`
 - Install one dependency group: `make install GROUP=test`, `make install GROUP=lint`, `make install GROUP=format`, or `make install GROUP=release`
 
@@ -29,18 +30,19 @@ The Makefile defaults to:
 
 - `UV_BIN=uv`
 - `PYTHON_VERSION=3.14`
-- `PYTHON_VIRTUAL_ENVIRONMENT=.venv`
+- `PYTHON_VERSIONS=3.11,3.12,3.13,3.14`
+- `PYTHON_VIRTUAL_ENVIRONMENT=.venv$(PYTHON_VERSION)`, so the default environment is `.venv3.14`
 
 If Python 3.14 is unavailable locally, pass a supported version explicitly, for example:
 
 ```bash
-make setup PYTHON_VERSION=3.13
+make setup PYTHON_VERSION=3.13 PYTHON_VIRTUAL_ENVIRONMENT=.venv3.13
 ```
 
 After setup, activate the environment when useful:
 
 ```bash
-source .venv/bin/activate
+source .venv3.14/bin/activate
 ```
 
 There is no database or application server to start.
@@ -63,19 +65,28 @@ make test
 make coverage
 ```
 
+For multi-version checks when the interpreters are available:
+
+```bash
+make test-all
+make coverage-all
+```
+
 For documentation-only changes, run the smallest relevant check and state what was skipped if full verification is not needed.
 
-`make clean` removes the virtual environment and generated files. Treat it as destructive and do not run it unless the task calls for cleanup.
+`make clean` removes configured virtual environments and generated files. Treat it as destructive and do not run it unless the task calls for cleanup.
 
 ## Testing Instructions
 
 - Run all tests: `make test`
+- Run all configured Python versions: `make test-all`
 - Run coverage: `make coverage`
-- Run tests directly after setup: `.venv/bin/python3.14 -m pytest --config-file pyproject.toml`
-- Run a specific file: `.venv/bin/python3.14 -m pytest tests/clocks/test_utc_clock.py --config-file pyproject.toml`
-- Run a focused test expression: `.venv/bin/python3.14 -m pytest -k "system_clock" --config-file pyproject.toml`
+- Run all-version coverage: `make coverage-all`
+- Run tests directly after setup: `.venv3.14/bin/python3.14 -m pytest --config-file pyproject.toml`
+- Run a specific file: `.venv3.14/bin/python3.14 -m pytest tests/clocks/test_utc_clock.py --config-file pyproject.toml`
+- Run a focused test expression: `.venv3.14/bin/python3.14 -m pytest -k "system_clock" --config-file pyproject.toml`
 
-If setup used a different `PYTHON_VERSION`, adjust the `.venv/bin/python3.14` path or activate the environment and use `python -m pytest ...`.
+If setup used a different `PYTHON_VERSION`, adjust the `.venv3.14/bin/python3.14` path or activate the environment and use `python -m pytest ...`.
 
 Test conventions:
 
@@ -113,7 +124,7 @@ Architecture conventions:
 
 ## Build And Release
 
-- Build distributions locally: `make build`
+- Build distributions locally: `make build-code`
 - Build output is written to `dist/`.
 - Do not publish packages manually from an agent session.
 - Releases are managed in CI on pushes to `master` using `python-semantic-release`.
