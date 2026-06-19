@@ -56,6 +56,15 @@ You can install **Clock Pattern** using `pip`:
 pip install clock-pattern
 ```
 
+You can install the companion AI-agent skill from [skills.sh](https://www.skills.sh/) with Vercel's `skills` CLI:
+
+```bash
+npx skills add adriamontoto/clock-pattern
+```
+
+Review the skill source in [`skills/clock-pattern`](skills/clock-pattern) before installing it in sensitive
+environments.
+
 <p align="right">
     <a href="#readme-top">🔼 Back to top</a>
 </p><br><br>
