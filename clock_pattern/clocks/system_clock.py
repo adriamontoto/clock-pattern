@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 
 from value_object_pattern.usables.dates import StringTimezoneValueObject, TimezoneValueObject
 
-from clock_pattern.models.clock import Clock
+from clock_pattern.clocks.models import Clock
 
 
 class SystemClock(Clock):

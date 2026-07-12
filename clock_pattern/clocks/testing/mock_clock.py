@@ -15,7 +15,7 @@ from unittest.mock import Mock
 from value_object_pattern.usables import NotNoneValueObject
 from value_object_pattern.usables.dates import DateValueObject, DatetimeValueObject
 
-from clock_pattern.models.clock import Clock
+from clock_pattern.clocks.models import Clock
 
 
 class MockClock(Clock):

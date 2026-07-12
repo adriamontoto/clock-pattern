@@ -1,5 +1,5 @@
 """
-Abstract clock contract for injectable time sources.
+Abstract clock contract for injectable wall-clock time sources.
 """
 
 from abc import ABC, abstractmethod
@@ -10,15 +10,10 @@ class Clock(ABC):
     """
     Define the interface for objects that provide the current datetime and date.
 
-    Application code should depend on this abstraction instead of calling `datetime.now()` or `date.today()` directly.
-    That keeps time-sensitive code deterministic in tests and lets production code choose the appropriate clock
-    implementation at the composition boundary.
-
-    ***This class is abstract and should not be instantiated directly***.
-
     Example:
     ```python
-    from clock_pattern import Clock, UtcClock
+    from clock_pattern import UtcClock
+    from clock_pattern.clocks.models import Clock
 
 
     class TimestampService:
