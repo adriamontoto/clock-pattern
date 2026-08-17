@@ -38,7 +38,7 @@ keywords = [
     'domain-driven-design',
 ]
 requires-python = '>=3.11'
-dependencies = ['value-object-pattern>=0.6.0']
+dependencies = ['value-object-pattern>=1.31.0']
 dynamic = ['version']
 
 [project.urls]
@@ -55,6 +55,7 @@ lint = ['ruff>=0.11.10', 'mypy[reports]>=1.0.0', { include-group = 'test' }]
 release = ['build>=1.2.2', 'python-semantic-release>=10.0.2']
 test = [
     'pytest>=8.0.0',
+    'pytest-asyncio>=1.3.0',
     'pytest-randomly>=3.0.0',
     'object-mother-pattern>=2.1.0',
     { include-group = 'coverage' },

@@ -161,6 +161,7 @@ The package offers several clock implementations to suit different needs:
 | [`Clock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/models/clock.py) | `from clock_pattern import Clock` | Abstract contract for code that needs `now()` or `today()`. |
 | [`SystemClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/system_clock.py) | `from clock_pattern import SystemClock` | Production clock backed by system time in a configured timezone. |
 | [`UtcClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/utc_clock.py) | `from clock_pattern import UtcClock` | Production clock fixed to UTC. |
+| `SystemMonotonicClock` | `from clock_pattern import SystemMonotonicClock` | Production monotonic clock for elapsed-time measurement. |
 | [`FixedClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/testing/fixed_clock.py) | `from clock_pattern.clocks.testing import FixedClock` | Test clock that always returns the same datetime and derived date. |
 | [`MockClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/testing/mock_clock.py) | `from clock_pattern.clocks.testing import MockClock` | Test clock with prepared return values and call assertions. |
 
