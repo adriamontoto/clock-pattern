@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.8.0 (2026-08-18)
+
+### ✨ Features
+
+- Implement monotonic clock
+  ([`2eeb586`](https://github.com/adriamontoto/clock-pattern/commit/2eeb5860768659fbee66095f9417608b6620d281))
+
+
 ## v0.7.0 (2026-05-20)
 
 ### ✨ Features
