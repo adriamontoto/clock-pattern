@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v0.9.0 (2026-08-23)
+
+### ✨ Features
+
+- Implement Sleeper and SleeperAsync for sync and async sleeping
+  ([`22083c1`](https://github.com/adriamontoto/clock-pattern/commit/22083c1c826c3a2be33787a9c52edf35ee675e2e))
+
+- Implement stopwatch
+  ([`572637f`](https://github.com/adriamontoto/clock-pattern/commit/572637f5b3cadfa007309556086409ef9b2f804e))
+
+
 ## v0.8.0 (2026-08-18)
 
 ### ✨ Features
