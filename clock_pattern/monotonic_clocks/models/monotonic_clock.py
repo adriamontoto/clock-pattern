@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 
 class MonotonicClock(ABC):
     """
-    Define the interface for objects that provide monotonically increasing seconds.
+    Define the interface for objects that provide seconds that never decrease.
 
     Example:
     ```python

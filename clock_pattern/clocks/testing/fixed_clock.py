@@ -11,9 +11,8 @@ else:
 
 from datetime import UTC, date, datetime
 
-from value_object_pattern.usables.dates import DatetimeValueObject
-
 from clock_pattern.clocks.models import Clock
+from value_object_pattern.usables.dates import DatetimeValueObject
 
 
 class FixedClock(Clock):

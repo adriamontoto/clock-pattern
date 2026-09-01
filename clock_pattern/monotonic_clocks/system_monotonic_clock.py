@@ -16,7 +16,7 @@ from clock_pattern.monotonic_clocks.models import MonotonicClock
 
 class SystemMonotonicClock(MonotonicClock):
     """
-    Return monotonically increasing seconds from the operating system.
+    Return seconds from an operating-system clock that never decreases.
 
     Example:
     ```python
