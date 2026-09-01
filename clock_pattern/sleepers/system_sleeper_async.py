@@ -13,8 +13,7 @@ from asyncio import sleep
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from value_object_pattern import UnionValueObject
-from value_object_pattern.usables import PositiveOrZeroFloatValueObject, PositiveOrZeroIntegerValueObject
+from value_object_pattern.usables import PositiveOrZeroNumberValueObject
 
 from clock_pattern.monotonic_clocks.models import MonotonicClock
 from clock_pattern.sleepers.models import SleeperAsync
@@ -43,9 +42,6 @@ class SystemSleeperAsync(SleeperAsync):
         Args:
             monotonic_clock (MonotonicClock): The monotonic clock to use .
 
-        Raises:
-            TypeError: If `monotonic_clock` is not a `MonotonicClock`.
-
         Example:
         ```python
         from clock_pattern import SystemSleeperAsync
@@ -55,9 +51,6 @@ class SystemSleeperAsync(SleeperAsync):
         await sleeper.sleep(seconds=1)
         ```
         """
-        if not isinstance(monotonic_clock, MonotonicClock):
-            raise TypeError(f'SystemSleeperAsync monotonic_clock <<<{monotonic_clock}>>> must be a MonotonicClock. Got <<<{type(monotonic_clock).__name__}>>> type.')  # noqa: E501  # fmt: skip
-
         self._monotonic_clock = monotonic_clock
 
     @override
@@ -69,7 +62,8 @@ class SystemSleeperAsync(SleeperAsync):
             seconds (int | float): The number of seconds to pause execution.
 
         Raises:
-            TypeError: If `seconds` is not a positive-or-zero integer or float.
+            TypeError: If `seconds` is not an integer or float.
+            ValueError: If `seconds` is negative.
 
         Example:
         ```python
@@ -80,11 +74,7 @@ class SystemSleeperAsync(SleeperAsync):
         await sleeper.sleep(seconds=1)
         ```
         """
-        UnionValueObject[PositiveOrZeroIntegerValueObject | PositiveOrZeroFloatValueObject](
-            value=seconds,  # type: ignore[arg-type]
-            title='SystemSleeperAsync',
-            parameter='seconds',
-        )
+        PositiveOrZeroNumberValueObject(value=seconds, title='SystemSleeperAsync', parameter='seconds')
 
         await sleep(seconds)
 
@@ -97,12 +87,13 @@ class SystemSleeperAsync(SleeperAsync):
         Args:
             seconds (int | float): The minimum elapsed duration for the enclosed asynchronous work.
 
+        Raises:
+            TypeError: If `seconds` is not an integer or float.
+            ValueError: If `seconds` is negative.
+
         Returns:
             AbstractAsyncContextManager[None]: An async context manager that awaits any remaining duration when the
             enclosed work exits.
-
-        Raises:
-            TypeError: If `seconds` is not a positive-or-zero integer or float.
 
         Example:
         ```python
@@ -115,11 +106,7 @@ class SystemSleeperAsync(SleeperAsync):
             pass
         ```
         """
-        UnionValueObject[PositiveOrZeroIntegerValueObject | PositiveOrZeroFloatValueObject](
-            value=seconds,  # type: ignore[arg-type]
-            title='SystemSleeperAsync',
-            parameter='seconds',
-        )
+        PositiveOrZeroNumberValueObject(value=seconds, title='SystemSleeperAsync', parameter='seconds')
 
         started_time = self._monotonic_clock.current_seconds()
         try:

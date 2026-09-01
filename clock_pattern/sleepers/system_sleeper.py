@@ -13,8 +13,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from time import sleep
 
-from value_object_pattern import UnionValueObject
-from value_object_pattern.usables import PositiveOrZeroFloatValueObject, PositiveOrZeroIntegerValueObject
+from value_object_pattern.usables import PositiveOrZeroNumberValueObject
 
 from clock_pattern.monotonic_clocks.models import MonotonicClock
 from clock_pattern.sleepers.models import Sleeper
@@ -43,9 +42,6 @@ class SystemSleeper(Sleeper):
         Args:
             monotonic_clock (MonotonicClock): The monotonic clock to use.
 
-        Raises:
-            TypeError: If `monotonic_clock` is not a `MonotonicClock`.
-
         Example:
         ```python
         from clock_pattern import SystemSleeper
@@ -55,9 +51,6 @@ class SystemSleeper(Sleeper):
         sleeper.sleep(seconds=1)
         ```
         """
-        if not isinstance(monotonic_clock, MonotonicClock):
-            raise TypeError(f'SystemSleeper monotonic_clock <<<{monotonic_clock}>>> must be a MonotonicClock. Got <<<{type(monotonic_clock).__name__}>>> type.')  # noqa: E501  # fmt: skip
-
         self._monotonic_clock = monotonic_clock
 
     @override
@@ -69,10 +62,8 @@ class SystemSleeper(Sleeper):
             seconds (int | float): The number of seconds to pause execution.
 
         Raises:
-            TypeError: If `seconds` is not an integer.
-            ValueError: If `seconds` is not a positive or zero integer.
-            TypeError: If `seconds` is not a float.
-            ValueError: If `seconds` is not a positive or zero float.
+            TypeError: If `seconds` is not an integer or float.
+            ValueError: If `seconds` is negative.
 
         Example:
         ```python
@@ -83,11 +74,7 @@ class SystemSleeper(Sleeper):
         sleeper.sleep(seconds=1)
         ```
         """
-        UnionValueObject[PositiveOrZeroIntegerValueObject | PositiveOrZeroFloatValueObject](
-            value=seconds,  # type: ignore[arg-type]
-            title='SystemSleeper',
-            parameter='seconds',
-        )
+        PositiveOrZeroNumberValueObject(value=seconds, title='SystemSleeper', parameter='seconds')
 
         sleep(seconds)
 
@@ -100,15 +87,13 @@ class SystemSleeper(Sleeper):
         Args:
             seconds (int | float): The minimum elapsed duration for the enclosed synchronous work.
 
+        Raises:
+            TypeError: If `seconds` is not an integer or float.
+            ValueError: If `seconds` is negative.
+
         Returns:
             AbstractContextManager[None]: A context manager that sleeps for any remaining duration when the enclosed
             work exits.
-
-        Raises:
-            TypeError: If `seconds` is not an integer.
-            ValueError: If `seconds` is not a positive or zero integer.
-            TypeError: If `seconds` is not a float.
-            ValueError: If `seconds` is not a positive or zero float.
 
         Example:
         ```python
@@ -121,11 +106,7 @@ class SystemSleeper(Sleeper):
             pass
         ```
         """
-        UnionValueObject[PositiveOrZeroIntegerValueObject | PositiveOrZeroFloatValueObject](
-            value=seconds,  # type: ignore[arg-type]
-            title='SystemSleeper',
-            parameter='seconds',
-        )
+        PositiveOrZeroNumberValueObject(value=seconds, title='SystemSleeper', parameter='seconds')
 
         started_time = self._monotonic_clock.current_seconds()
         try:

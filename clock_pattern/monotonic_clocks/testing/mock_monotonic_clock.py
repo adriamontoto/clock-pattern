@@ -11,8 +11,9 @@ else:
 
 from unittest.mock import Mock
 
-from clock_pattern.monotonic_clocks.models import MonotonicClock
 from value_object_pattern.usables import PositiveOrZeroNumberValueObject
+
+from clock_pattern.monotonic_clocks.models import MonotonicClock
 
 
 class MockMonotonicClock(MonotonicClock):
