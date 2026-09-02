@@ -106,7 +106,7 @@ class MockClock(Clock):
 
         self._now_mock()
 
-        return self._now_datetime  # type: ignore[return-value]
+        return self._now_datetime  # type: ignore[ty:invalid-return-type]
 
     def prepare_now_method_return_value(self, *, now: datetime) -> None:
         """
@@ -220,7 +220,7 @@ class MockClock(Clock):
 
         self._today_mock()
 
-        return self._today_date  # type: ignore[return-value]
+        return self._today_date  # type: ignore[ty:invalid-return-type]
 
     def prepare_today_method_return_value(self, *, today: date) -> None:
         """

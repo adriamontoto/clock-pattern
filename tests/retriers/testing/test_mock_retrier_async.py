@@ -4,7 +4,6 @@ Test the asynchronous mock retrier.
 
 from math import inf, nan
 from re import escape
-from typing import Any, cast
 
 from object_mother_pattern import BooleanMother, FloatMother, IntegerMother
 from pytest import mark, raises as assert_raises
@@ -213,7 +212,7 @@ async def test_mock_retrier_async_attempts_invalid_type() -> None:
         expected_exception=TypeError,
         match=escape(f'MockRetrierAsync attempts <<<{attempts}>>> must be an integer. Got <<<{type(attempts).__name__}>>> type.'),  # noqa: E501
     ):  # fmt: skip
-        await MockRetrierAsync().retry(operation=operation, attempts=cast(Any, attempts))
+        await MockRetrierAsync().retry(operation=operation, attempts=attempts)
 
 
 @mark.unit_testing
@@ -283,7 +282,7 @@ async def test_mock_retrier_async_delay_seconds_invalid_type() -> None:
         await MockRetrierAsync().retry(
             operation=operation,
             attempts=1,
-            delay_seconds=cast(Any, delay_seconds),
+            delay_seconds=delay_seconds,
         )
 
 
@@ -364,7 +363,7 @@ async def test_mock_retrier_async_backoff_invalid_type() -> None:
         expected_exception=TypeError,
         match=escape(f'MockRetrierAsync backoff <<<{backoff}>>> must be an integer or float. Got <<<{type(backoff).__name__}>>> type.'),  # noqa: E501
     ):  # fmt: skip
-        await MockRetrierAsync().retry(operation=operation, attempts=1, backoff=cast(Any, backoff))
+        await MockRetrierAsync().retry(operation=operation, attempts=1, backoff=backoff)
 
 
 @mark.unit_testing
@@ -448,7 +447,7 @@ async def test_mock_retrier_async_jitter_invalid_type() -> None:
         expected_exception=TypeError,
         match=escape(f'MockRetrierAsync jitter <<<{jitter}>>> must be a boolean. Got <<<{type(jitter).__name__}>>> type.'),  # noqa: E501
     ):  # fmt: skip
-        await MockRetrierAsync().retry(operation=operation, attempts=1, jitter=cast(Any, jitter))
+        await MockRetrierAsync().retry(operation=operation, attempts=1, jitter=jitter)
 
 
 @mark.unit_testing
@@ -537,5 +536,5 @@ def test_mock_retrier_async_assert_retry_method_jitter_invalid_type() -> None:
         MockRetrierAsync().assert_retry_method_was_called_once_with(
             operation=operation,
             attempts=1,
-            jitter=cast(Any, jitter),
+            jitter=jitter,
         )

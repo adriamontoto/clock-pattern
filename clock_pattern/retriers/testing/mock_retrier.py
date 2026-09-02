@@ -139,12 +139,12 @@ class MockRetrier(Retrier):
 
         return cast(T, self._return_value)
 
-    def prepare_retry_method_return_value(self, *, value: Any) -> None:
+    def prepare_retry_method_return_value(self, *, value: object) -> None:
         """
         Prepare the value returned by `retry()`.
 
         Args:
-            value (Any): Value returned by `retry()`.
+            value (object): Value returned by `retry()`.
 
         Example:
         ```python

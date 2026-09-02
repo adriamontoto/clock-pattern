@@ -3,7 +3,7 @@ Test MockPollerAsync poller.
 """
 
 from re import escape
-from typing import Any, cast
+from typing import cast
 from unittest.mock import Mock
 
 from object_mother_pattern import FloatMother
@@ -151,7 +151,7 @@ async def test_mock_poller_async_condition_invalid_type() -> None:
     Test MockPollerAsync records a non-callable condition without runtime validation.
     """
     poller = MockPollerAsync()
-    condition = cast(Any, FloatMother.invalid_type())
+    condition = FloatMother.invalid_type()
 
     await poller.poll_until(condition=condition, timeout_seconds=1)
 

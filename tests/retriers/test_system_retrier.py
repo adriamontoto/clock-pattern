@@ -4,7 +4,6 @@ Test the synchronous system retrier.
 
 from math import inf, nan
 from re import escape
-from typing import Any, cast
 
 from object_mother_pattern import BooleanMother, FloatMother, IntegerMother
 from pytest import mark, raises as assert_raises
@@ -254,7 +253,7 @@ def test_system_retrier_attempts_invalid_type() -> None:
     ):  # fmt: skip
         SystemRetrier(sleeper=MockSleeper(monotonic_clock=MockMonotonicClock())).retry(
             operation=lambda: 'done',
-            attempts=cast(Any, attempts),
+            attempts=attempts,
         )
 
 
@@ -316,7 +315,7 @@ def test_system_retrier_delay_seconds_invalid_type() -> None:
         SystemRetrier(sleeper=MockSleeper(monotonic_clock=MockMonotonicClock())).retry(
             operation=lambda: 'done',
             attempts=1,
-            delay_seconds=cast(Any, delay_seconds),
+            delay_seconds=delay_seconds,
         )
 
 
@@ -380,7 +379,7 @@ def test_system_retrier_backoff_invalid_type() -> None:
         SystemRetrier(sleeper=MockSleeper(monotonic_clock=MockMonotonicClock())).retry(
             operation=lambda: 'done',
             attempts=1,
-            backoff=cast(Any, backoff),
+            backoff=backoff,
         )
 
 
@@ -460,7 +459,7 @@ def test_system_retrier_jitter_invalid_type() -> None:
         SystemRetrier(sleeper=MockSleeper(monotonic_clock=MockMonotonicClock())).retry(
             operation=lambda: 'done',
             attempts=1,
-            jitter=cast(Any, jitter),
+            jitter=jitter,
         )
 
 

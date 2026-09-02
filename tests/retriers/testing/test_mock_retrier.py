@@ -4,7 +4,6 @@ Test the synchronous mock retrier.
 
 from math import inf, nan
 from re import escape
-from typing import Any, cast
 
 from object_mother_pattern import BooleanMother, FloatMother, IntegerMother
 from pytest import mark, raises as assert_raises
@@ -184,7 +183,7 @@ def test_mock_retrier_attempts_invalid_type() -> None:
         expected_exception=TypeError,
         match=escape(f'MockRetrier attempts <<<{attempts}>>> must be an integer. Got <<<{type(attempts).__name__}>>> type.'),  # noqa: E501
     ):  # fmt: skip
-        MockRetrier().retry(operation=lambda: 'ignored', attempts=cast(Any, attempts))
+        MockRetrier().retry(operation=lambda: 'ignored', attempts=attempts)
 
 
 @mark.unit_testing
@@ -237,7 +236,7 @@ def test_mock_retrier_delay_seconds_invalid_type() -> None:
         MockRetrier().retry(
             operation=lambda: 'ignored',
             attempts=1,
-            delay_seconds=cast(Any, delay_seconds),
+            delay_seconds=delay_seconds,
         )
 
 
@@ -296,7 +295,7 @@ def test_mock_retrier_backoff_invalid_type() -> None:
         expected_exception=TypeError,
         match=escape(f'MockRetrier backoff <<<{backoff}>>> must be an integer or float. Got <<<{type(backoff).__name__}>>> type.'),  # noqa: E501
     ):  # fmt: skip
-        MockRetrier().retry(operation=lambda: 'ignored', attempts=1, backoff=cast(Any, backoff))
+        MockRetrier().retry(operation=lambda: 'ignored', attempts=1, backoff=backoff)
 
 
 @mark.unit_testing
@@ -358,7 +357,7 @@ def test_mock_retrier_jitter_invalid_type() -> None:
         expected_exception=TypeError,
         match=escape(f'MockRetrier jitter <<<{jitter}>>> must be a boolean. Got <<<{type(jitter).__name__}>>> type.'),
     ):
-        MockRetrier().retry(operation=lambda: 'ignored', attempts=1, jitter=cast(Any, jitter))
+        MockRetrier().retry(operation=lambda: 'ignored', attempts=1, jitter=jitter)
 
 
 @mark.unit_testing
@@ -434,5 +433,5 @@ def test_mock_retrier_assert_retry_method_jitter_invalid_type() -> None:
         MockRetrier().assert_retry_method_was_called_once_with(
             operation=lambda: 'ignored',
             attempts=1,
-            jitter=cast(Any, jitter),
+            jitter=jitter,
         )

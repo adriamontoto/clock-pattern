@@ -206,7 +206,7 @@ class SystemDeadline(Deadline):
         if previous_signal_handler != signal_module.SIG_DFL or previous_timer != (0.0, 0.0):
             raise RuntimeError('SystemDeadline context manager cannot replace an existing SIGALRM handler or timer.')
 
-        self._previous_signal_handler = previous_signal_handler
+        self._previous_signal_handler = previous_signal_handler  # type: ignore[ty:invalid-assignment]
         self._previous_timer = previous_timer
         try:
             signal_module.signal(signal_module.SIGALRM, self._handle_timeout)
