@@ -15,7 +15,7 @@ class RetrierAsync(ABC):
 
     Example:
     ```python
-    from clock_pattern import SystemRetrierAsync
+    from clock_pattern import SystemMonotonicClock, SystemRetrierAsync, SystemSleeperAsync
     from clock_pattern.retriers.models import RetrierAsync
 
 
@@ -30,7 +30,9 @@ class RetrierAsync(ABC):
             return await self._retrier.retry(operation=operation, attempts=3)
 
 
-    sender = MessageSender(retrier=SystemRetrierAsync())
+    monotonic_clock = SystemMonotonicClock()
+    sleeper = SystemSleeperAsync(monotonic_clock=monotonic_clock)
+    sender = MessageSender(retrier=SystemRetrierAsync(sleeper=sleeper))
     print(await sender.send())
     # >>> sent
     ```
@@ -66,7 +68,7 @@ class RetrierAsync(ABC):
 
         Example:
         ```python
-        from clock_pattern import SystemRetrierAsync
+        from clock_pattern import SystemMonotonicClock, SystemRetrierAsync, SystemSleeperAsync
         from clock_pattern.retriers.models import RetrierAsync
 
 
@@ -81,7 +83,9 @@ class RetrierAsync(ABC):
                 return await self._retrier.retry(operation=operation, attempts=3)
 
 
-        sender = MessageSender(retrier=SystemRetrierAsync())
+        monotonic_clock = SystemMonotonicClock()
+        sleeper = SystemSleeperAsync(monotonic_clock=monotonic_clock)
+        sender = MessageSender(retrier=SystemRetrierAsync(sleeper=sleeper))
         print(await sender.send())
         # >>> sent
         ```

@@ -61,7 +61,9 @@ class SystemClock(Clock):
         ```
         """
         if isinstance(timezone, tzinfo):
-            timezone = str(TimezoneValueObject(value=timezone, title='SystemClock', parameter='timezone'))
+            TimezoneValueObject(value=timezone, title='SystemClock', parameter='timezone')
+            self._timezone = timezone
+            return
 
         StringTimezoneValueObject(value=timezone, title='SystemClock', parameter='timezone')
 

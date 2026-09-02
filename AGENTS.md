@@ -6,7 +6,7 @@ Clock Pattern is a typed Python package that turns time into an injectable depen
 
 Key paths:
 
-- `clock_pattern/models/clock.py`: abstract `Clock` contract with `now()` and `today()`.
+- `clock_pattern/clocks/models/clock.py`: abstract `Clock` contract with `now()` and `today()`.
 - `clock_pattern/clocks/system_clock.py`: timezone-aware system clock.
 - `clock_pattern/clocks/utc_clock.py`: UTC clock implementation.
 - `clock_pattern/clocks/testing/`: `FixedClock` and `MockClock` test utilities.
@@ -24,7 +24,8 @@ Run commands from the repository root.
 - Create the default virtual environment, install all dependency groups, and install hooks: `make setup`
 - Create all configured virtual environments: `make setup-all`
 - Install all dependency groups into an existing environment: `make install`
-- Install one dependency group: `make install GROUP=test`, `make install GROUP=lint`, `make install GROUP=format`, or `make install GROUP=release`
+- Install one dependency group with `make install GROUP=<group>`. Configured groups are `coverage`, `develop`, `format`,
+  `lint`, `release`, and `test`; `GROUP=all` installs all of them.
 
 The Makefile defaults to:
 
@@ -54,7 +55,8 @@ There is no database or application server to start.
 - Add or update tests for behavior changes.
 - For public API changes, update exports in `clock_pattern/__init__.py` or package `__init__.py` files as needed.
 - Keep `clock_pattern/py.typed` present so package typing remains advertised.
-- This repository currently has no lockfile; avoid introducing dependency lockfile churn unless the task is explicitly about dependency management.
+- This repository commits `uv.lock`; update it only when dependency changes require it and keep unrelated lockfile
+  churn out of other changes.
 
 Use this local verification loop for code changes:
 
@@ -94,6 +96,8 @@ Test conventions:
 - Test files use `test_*.py` naming.
 - Existing tests use `pytest.mark.unit_testing`.
 - Assertions are plain `assert`; Ruff permits `assert` in test files.
+- Exception tests should include the complete stable message in `pytest.raises(match=...)`; use narrowly scoped
+  wildcards only for generated values or unstable third-party details.
 - Test data helpers come from `object_mother_pattern` where useful.
 - Keep clock tests deterministic. Prefer `FixedClock` or `MockClock` when testing code that depends on time.
 
@@ -104,10 +108,10 @@ Coverage is configured in `pyproject.toml` with branch coverage enabled for `clo
 The canonical style is defined in `pyproject.toml`.
 
 - Format with Ruff: `make format`
-- Lint and type-check with Ruff and mypy: `make lint`
+- Lint and type-check with Ruff and ty: `make lint`
 - Ruff line length is `120`.
 - Ruff format uses single quotes and spaces for indentation.
-- Mypy runs in strict mode.
+- Ty rules are configured in `pyproject.toml`.
 - Imports are sorted by Ruff/isort with `clock_pattern` as first-party.
 - Public modules and classes use docstrings following the existing PEP 257 style.
 - Keep runtime code compatible with Python `>=3.11`.
@@ -116,7 +120,7 @@ The canonical style is defined in `pyproject.toml`.
 
 Architecture conventions:
 
-- New clock implementations should subclass `clock_pattern.models.clock.Clock`.
+- New clock implementations should subclass `clock_pattern.clocks.models.clock.Clock`.
 - `now()` returns `datetime`; `today()` returns `date`.
 - Clocks that return real time should be timezone-aware.
 - Test-only clocks belong under `clock_pattern/clocks/testing/`.

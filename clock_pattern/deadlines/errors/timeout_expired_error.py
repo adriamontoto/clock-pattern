@@ -6,6 +6,15 @@ Deadline exceptions.
 class TimeoutExpiredError(TimeoutError):
     """
     Raised when a deadline timeout expires.
+
+    Example:
+    ```python
+    from clock_pattern import TimeoutExpiredError
+
+    error = TimeoutExpiredError(elapsed_seconds=1.5)
+    print(error)
+    # >>> Deadline expired after <<<1.5>>> seconds.
+    ```
     """
 
     _elapsed_seconds: float
@@ -16,6 +25,15 @@ class TimeoutExpiredError(TimeoutError):
 
         Args:
             elapsed_seconds (float): Duration in seconds that expired.
+
+        Example:
+        ```python
+        from clock_pattern import TimeoutExpiredError
+
+        error = TimeoutExpiredError(elapsed_seconds=1.5)
+        print(error)
+        # >>> Deadline expired after <<<1.5>>> seconds.
+        ```
         """
         self._elapsed_seconds = elapsed_seconds
 
@@ -29,5 +47,14 @@ class TimeoutExpiredError(TimeoutError):
 
         Returns:
             float: Duration in seconds that expired.
+
+        Example:
+        ```python
+        from clock_pattern import TimeoutExpiredError
+
+        error = TimeoutExpiredError(elapsed_seconds=1.5)
+        print(error.elapsed_seconds)
+        # >>> 1.5
+        ```
         """
         return self._elapsed_seconds

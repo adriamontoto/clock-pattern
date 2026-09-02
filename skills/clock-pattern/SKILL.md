@@ -22,7 +22,7 @@ stays explicit and tests stay deterministic.
    - Use `Sleeper` or `SleeperAsync` for code that needs to wait.
    - Use monotonic helpers for elapsed durations, deadlines, polling, and retries.
 3. Prefer package-provided implementations before writing local wrappers.
-4. Keep real time out of unit tests. Use fixed clocks, mock clocks, manual monotonic clocks, and mock sleepers.
+4. Keep real time out of unit tests. Use fixed clocks, mock clocks, mock monotonic clocks, and mock sleepers.
 5. Add focused tests for timezone behavior, date-boundary behavior, elapsed-duration behavior, and retry/poll timeout
    paths when those rules matter.
 
@@ -65,17 +65,26 @@ clock = SystemClock(timezone='Europe/Madrid')
 Use monotonic-time helpers for elapsed duration behavior:
 
 ```python
-from clock_pattern import Poller, Retrier, Stopwatch, deadline
+from clock_pattern import Stopwatch, SystemDeadline, SystemMonotonicClock, SystemPoller, SystemRetrier, SystemSleeper
 
-with Stopwatch() as stopwatch:
-    process_batch()
+monotonic_clock = SystemMonotonicClock()
+sleeper = SystemSleeper(monotonic_clock=monotonic_clock)
+poller = SystemPoller(sleeper=sleeper, monotonic_clock=monotonic_clock)
 
-with deadline(seconds=5) as timeout:
-    while not job_is_done():
-        timeout.raise_if_expired()
+with Stopwatch(monotonic_clock=monotonic_clock) as stopwatch:
+    pass
 
-Poller().poll_until(condition=lambda: cache.exists(key), timeout_seconds=5, interval_seconds=0.1)
-Retrier().retry(operation=lambda: client.send(message), attempts=3, delay_seconds=0.2, backoff=2, jitter=True)
+with SystemDeadline(seconds=5, monotonic_clock=monotonic_clock):
+    pass
+
+poller.poll_until(condition=lambda: True, timeout_seconds=5, interval_seconds=0.1)
+SystemRetrier(sleeper=sleeper).retry(
+    operation=lambda: 'done',
+    attempts=3,
+    delay_seconds=0.2,
+    backoff=2,
+    jitter=True,
+)
 ```
 
 ## Review Checklist
@@ -86,7 +95,7 @@ Retrier().retry(operation=lambda: client.send(message), attempts=3, delay_second
 - Timeouts, polling, retries, and elapsed-duration logic use monotonic time rather than wall-clock datetimes.
 - Unit tests avoid real `SystemClock`, `UtcClock`, real sleeping, and current real time.
 - Exact date/datetime assertions use explicit fixed values.
-- Async code uses `SleeperAsync`, `PollerAsync`, or `RetrierAsync` rather than sync helpers.
+- Async code depends on `SleeperAsync`, `PollerAsync`, or `RetrierAsync` and uses their async implementations.
 
 ## Common Mistakes
 

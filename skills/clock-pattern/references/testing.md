@@ -6,7 +6,8 @@ Use this file when writing deterministic tests for code that depends on Clock Pa
 
 ```python
 from clock_pattern.clocks.testing import FixedClock, MockClock
-from clock_pattern.monotonic_clocks.testing import ManualMonotonicClock
+from clock_pattern.deadlines.testing import MockDeadline
+from clock_pattern.monotonic_clocks.testing import MockMonotonicClock
 from clock_pattern.pollers.testing import MockPoller, MockPollerAsync
 from clock_pattern.retriers.testing import MockRetrier, MockRetrierAsync
 from clock_pattern.sleepers.testing import MockSleeper, MockSleeperAsync
@@ -18,7 +19,8 @@ from clock_pattern.sleepers.testing import MockSleeper, MockSleeperAsync
 | --- | --- |
 | `FixedClock` | The test needs one stable datetime and date. |
 | `MockClock` | The test needs prepared return values and call assertions. |
-| `ManualMonotonicClock` | The test needs deterministic elapsed time. |
+| `MockMonotonicClock` | The test needs deterministic elapsed time. |
+| `MockDeadline` | A unit accepts an injected deadline. |
 | `MockSleeper` / `MockSleeperAsync` | The test needs sleep assertions without real waiting. |
 | `MockPoller` / `MockPollerAsync` | A service depends on polling but the unit test should not poll. |
 | `MockRetrier` / `MockRetrierAsync` | A service depends on retrying but the unit test should not retry. |
@@ -59,15 +61,15 @@ clock.assert_now_method_was_not_called()
 Prepare `now()` with `prepare_now_method_return_value(now=...)`. Prepare `today()` with
 `prepare_today_method_return_value(today=...)`. Calling an unprepared method raises a validation error.
 
-## ManualMonotonicClock And MockSleepers
+## MockMonotonicClock, MockDeadline, And MockSleepers
 
-Use `ManualMonotonicClock` to advance elapsed time explicitly.
+Use `MockMonotonicClock` to advance elapsed time explicitly.
 
 ```python
-from clock_pattern.monotonic_clocks.testing import ManualMonotonicClock
+from clock_pattern.monotonic_clocks.testing import MockMonotonicClock
 from clock_pattern.sleepers.testing import MockSleeper
 
-monotonic_clock = ManualMonotonicClock()
+monotonic_clock = MockMonotonicClock()
 sleeper = MockSleeper(monotonic_clock=monotonic_clock)
 
 with sleeper.minimum_duration(seconds=2):
@@ -76,8 +78,22 @@ with sleeper.minimum_duration(seconds=2):
 sleeper.assert_sleep_method_was_called_once_with(seconds=0.5)
 ```
 
-`MockSleeper.sleep(seconds=...)` records calls and advances its manual monotonic clock by the requested duration.
+`MockSleeper.sleep(seconds=...)` records calls and advances its mock monotonic clock by the requested duration.
 `MockSleeperAsync` provides the same behavior for async code.
+
+Use `MockDeadline` when a unit depends directly on the `Deadline` contract:
+
+```python
+from clock_pattern.deadlines.testing import MockDeadline
+
+deadline = MockDeadline(seconds=2)
+deadline.advance(seconds=1)
+deadline.raise_if_expired()
+deadline.assert_raise_if_expired_method_was_called_once()
+```
+
+As a context manager, `MockDeadline` rejects an already-expired entry and checks expiry after a successful body. Tests
+can call `advance()` inside the context to exercise timeout handling without real signals or waiting.
 
 ## Mock Pollers And Retriers
 
@@ -91,14 +107,15 @@ poller = MockPoller()
 retrier = MockRetrier()
 ```
 
-These test doubles record method calls and can be prepared to raise exceptions or return values, depending on the class.
+These test doubles implement `Poller` / `PollerAsync` and `Retrier` / `RetrierAsync`. They record method calls and can
+be prepared to raise exceptions or return values, depending on the class.
 
 ## Testing Checklist
 
 - Prefer explicit dates and datetimes over generated values when assertions depend on exact output.
 - Use fixed clocks for stable time values and date-boundary cases.
 - Use mock clocks for interaction assertions.
-- Use manual monotonic clocks for elapsed-duration tests.
-- Use mock sleepers, pollers, and retriers to avoid real waiting or repeated work in unit tests.
+- Use mock monotonic clocks for elapsed-duration tests.
+- Use mock deadlines, sleepers, pollers, and retriers to avoid real waiting or repeated work in unit tests.
 - Avoid real `SystemClock`, `UtcClock`, `SystemSleeper`, real polling, and real retrying in unit tests for business
   logic.

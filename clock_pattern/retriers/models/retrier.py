@@ -15,7 +15,7 @@ class Retrier(ABC):
 
     Example:
     ```python
-    from clock_pattern import SystemRetrier
+    from clock_pattern import SystemMonotonicClock, SystemRetrier, SystemSleeper
     from clock_pattern.retriers.models import Retrier
 
 
@@ -27,7 +27,9 @@ class Retrier(ABC):
             return self._retrier.retry(operation=lambda: 'sent', attempts=3)
 
 
-    sender = MessageSender(retrier=SystemRetrier())
+    monotonic_clock = SystemMonotonicClock()
+    sleeper = SystemSleeper(monotonic_clock=monotonic_clock)
+    sender = MessageSender(retrier=SystemRetrier(sleeper=sleeper))
     print(sender.send())
     # >>> sent
     ```
@@ -63,7 +65,7 @@ class Retrier(ABC):
 
         Example:
         ```python
-        from clock_pattern import SystemRetrier
+        from clock_pattern import SystemMonotonicClock, SystemRetrier, SystemSleeper
         from clock_pattern.retriers.models import Retrier
 
 
@@ -75,7 +77,9 @@ class Retrier(ABC):
                 return self._retrier.retry(operation=lambda: 'sent', attempts=3)
 
 
-        sender = MessageSender(retrier=SystemRetrier())
+        monotonic_clock = SystemMonotonicClock()
+        sleeper = SystemSleeper(monotonic_clock=monotonic_clock)
+        sender = MessageSender(retrier=SystemRetrier(sleeper=sleeper))
         print(sender.send())
         # >>> sent
         ```

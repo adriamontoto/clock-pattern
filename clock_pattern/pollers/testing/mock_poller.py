@@ -75,6 +75,15 @@ class MockPoller(Poller):
             TypeError: If `condition` does not return a boolean.
             TimeoutExpiredError: If the timeout expires before `condition` returns `True`.
 
+        Example:
+        ```python
+        from clock_pattern.pollers.testing import MockPoller
+
+        poller = MockPoller()
+        condition = lambda: True
+        poller.poll_until(condition=condition, timeout_seconds=1)
+        poller.assert_poll_until_method_was_called_once_with(condition=condition, timeout_seconds=1)
+        ```
         """
         PositiveOrZeroNumberValueObject(value=timeout_seconds, title='MockPoller', parameter='timeout_seconds')
         PositiveNumberValueObject(value=interval_seconds, title='MockPoller', parameter='interval_seconds')
@@ -97,11 +106,11 @@ class MockPoller(Poller):
 
         Example:
         ```python
-        from clock_pattern.deadlines import TimeoutExpiredError
+        from clock_pattern import TimeoutExpiredError
         from clock_pattern.pollers.testing import MockPoller
 
         poller = MockPoller()
-        poller.prepare_poll_until_method_exception(exception=TimeoutExpiredError(1))
+        poller.prepare_poll_until_method_exception(exception=TimeoutExpiredError(elapsed_seconds=1.0))
         ```
         """
         self._exception = exception
@@ -127,6 +136,16 @@ class MockPoller(Poller):
             TypeError: If `interval_seconds` is not an integer or a float.
             ValueError: If `interval_seconds` is not positive.
             TypeError: If `condition` does not return a boolean.
+
+        Example:
+        ```python
+        from clock_pattern.pollers.testing import MockPoller
+
+        poller = MockPoller()
+        condition = lambda: True
+        poller.poll_until(condition=condition, timeout_seconds=1)
+        poller.assert_poll_until_method_was_called_once_with(condition=condition, timeout_seconds=1)
+        ```
         """
         PositiveOrZeroNumberValueObject(value=timeout_seconds, title='MockPoller', parameter='timeout_seconds')
         PositiveNumberValueObject(value=interval_seconds, title='MockPoller', parameter='interval_seconds')

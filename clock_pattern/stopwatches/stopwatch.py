@@ -22,13 +22,16 @@ class Stopwatch(AbstractContextManager['Stopwatch']):
     Example:
     ```python
     from clock_pattern import Stopwatch
+    from clock_pattern.monotonic_clocks.testing import MockMonotonicClock
 
-    stopwatch = Stopwatch()
+    monotonic_clock = MockMonotonicClock()
+    stopwatch = Stopwatch(monotonic_clock=monotonic_clock)
 
     with stopwatch:
-        pass
+        monotonic_clock.advance(seconds=1)
 
     print(stopwatch.elapsed_seconds)
+    # >>> 1.0
     ```
     """
 
@@ -42,6 +45,16 @@ class Stopwatch(AbstractContextManager['Stopwatch']):
 
         Args:
             monotonic_clock (MonotonicClock): Monotonic clock used to measure elapsed seconds.
+
+        Example:
+        ```python
+        from clock_pattern import Stopwatch
+        from clock_pattern.monotonic_clocks.testing import MockMonotonicClock
+
+        stopwatch = Stopwatch(monotonic_clock=MockMonotonicClock())
+        print(stopwatch.elapsed_seconds)
+        # >>> 0.0
+        ```
         """
         self._monotonic_clock = monotonic_clock
         self._started_at = None
@@ -56,6 +69,17 @@ class Stopwatch(AbstractContextManager['Stopwatch']):
 
         Returns:
             Self: This stopwatch instance.
+
+        Example:
+        ```python
+        from clock_pattern import Stopwatch
+        from clock_pattern.monotonic_clocks.testing import MockMonotonicClock
+
+        stopwatch = Stopwatch(monotonic_clock=MockMonotonicClock())
+        stopwatch.start()
+        print(stopwatch.is_running)
+        # >>> True
+        ```
         """
         if self._started_at is not None and self._ended_at is None:
             raise RuntimeError('Stopwatch is already running.')
@@ -74,6 +98,18 @@ class Stopwatch(AbstractContextManager['Stopwatch']):
 
         Returns:
             float: Elapsed seconds between `start()` and `end()`.
+
+        Example:
+        ```python
+        from clock_pattern import Stopwatch
+        from clock_pattern.monotonic_clocks.testing import MockMonotonicClock
+
+        monotonic_clock = MockMonotonicClock()
+        stopwatch = Stopwatch(monotonic_clock=monotonic_clock).start()
+        monotonic_clock.advance(seconds=1)
+        print(stopwatch.end())
+        # >>> 1.0
+        ```
         """
         if self._started_at is None:
             raise RuntimeError('Stopwatch has not been started.')
@@ -92,6 +128,18 @@ class Stopwatch(AbstractContextManager['Stopwatch']):
 
         Returns:
             float: Elapsed seconds, or zero when the stopwatch has not started.
+
+        Example:
+        ```python
+        from clock_pattern import Stopwatch
+        from clock_pattern.monotonic_clocks.testing import MockMonotonicClock
+
+        monotonic_clock = MockMonotonicClock()
+        stopwatch = Stopwatch(monotonic_clock=monotonic_clock).start()
+        monotonic_clock.advance(seconds=0.5)
+        print(stopwatch.elapsed_seconds)
+        # >>> 0.5
+        ```
         """
         if self._started_at is None:
             return 0.0
@@ -107,6 +155,16 @@ class Stopwatch(AbstractContextManager['Stopwatch']):
 
         Returns:
             bool: `True` when the stopwatch is currently running.
+
+        Example:
+        ```python
+        from clock_pattern import Stopwatch
+        from clock_pattern.monotonic_clocks.testing import MockMonotonicClock
+
+        stopwatch = Stopwatch(monotonic_clock=MockMonotonicClock()).start()
+        print(stopwatch.is_running)
+        # >>> True
+        ```
         """
         return self._started_at is not None and self._ended_at is None
 
@@ -117,6 +175,16 @@ class Stopwatch(AbstractContextManager['Stopwatch']):
 
         Returns:
             Self: This stopwatch instance after `start()`.
+
+        Example:
+        ```python
+        from clock_pattern import Stopwatch
+        from clock_pattern.monotonic_clocks.testing import MockMonotonicClock
+
+        with Stopwatch(monotonic_clock=MockMonotonicClock()) as stopwatch:
+            print(stopwatch.is_running)
+        # >>> True
+        ```
         """
         return self.start()
 
@@ -137,6 +205,19 @@ class Stopwatch(AbstractContextManager['Stopwatch']):
 
         Returns:
             bool | None: `None`, so exceptions from the managed block are not suppressed.
+
+        Example:
+        ```python
+        from clock_pattern import Stopwatch
+        from clock_pattern.monotonic_clocks.testing import MockMonotonicClock
+
+        monotonic_clock = MockMonotonicClock()
+        with Stopwatch(monotonic_clock=monotonic_clock) as stopwatch:
+            monotonic_clock.advance(seconds=1)
+
+        print(stopwatch.elapsed_seconds)
+        # >>> 1.0
+        ```
         """
         if self.is_running:
             self.end()

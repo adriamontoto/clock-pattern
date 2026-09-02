@@ -29,6 +29,8 @@ clock = SystemClock(timezone='America/New_York')
 Timezone strings must be valid IANA timezone names supported by Python `zoneinfo.ZoneInfo`. Empty strings, untrimmed
 strings, invalid names, and unsupported types are rejected.
 
+`SystemClock` also accepts and preserves `datetime.tzinfo` instances, including fixed-offset and custom timezones.
+
 ## `today()` Is Timezone-Sensitive
 
 `today()` is calculated in the clock timezone. Around midnight, two clocks can return different dates at the same

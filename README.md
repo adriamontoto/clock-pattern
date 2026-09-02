@@ -35,7 +35,7 @@ implementations without touching business rules.
 - [📚 Documentation](#documentation)
 - [⚡ Quick Start](#quick-start)
 - [🧩 Why Inject a Clock?](#why-inject-a-clock)
-- [📚 Available Clocks](#available-clocks)
+- [📚 Public API](#public-api)
 - [🌍 Timezone Behavior](#timezone-behavior)
 - [🧪 Testing Time-Sensitive Code](#testing-time-sensitive-code)
 - [🎄 Real-Life Case: Christmas Detector Service](#real-life-case-christmas-detector-service)
@@ -143,32 +143,91 @@ The package exposes two methods:
 
 | Method | Returns | Typical use |
 | --- | --- | --- |
-| `now()` | `datetime` | Timestamps, expiration windows, audit fields, elapsed-time calculations. |
+| `now()` | `datetime` | Timestamps, expiration windows, and audit fields. |
 | `today()` | `date` | Calendar rules, billing days, holiday checks, date-only decisions. |
+
+Clock Pattern also includes injectable helpers for elapsed-duration behavior: monotonic clocks, sleepers, stopwatches,
+deadlines, pollers, and retriers. These use monotonic seconds instead of wall-clock datetimes so system clock changes do
+not affect timeout or retry behavior.
 
 <p align="right">
     <a href="#readme-top">🔼 Back to top</a>
 </p><br><br>
 
-<a name="available-clocks"></a>
+<a name="public-api"></a>
 
-## 📚 Available Clocks
+## 📚 Public API
 
-The package offers several clock implementations to suit different needs:
+Use the top-level package for contracts and production helpers, and each feature's `testing` package for test doubles.
 
-| Clock | Import path | Purpose |
+### Wall-Clock API
+
+| API | Import path | Purpose |
 | --- | --- | --- |
 | [`Clock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/models/clock.py) | `from clock_pattern import Clock` | Abstract contract for code that needs `now()` or `today()`. |
 | [`SystemClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/system_clock.py) | `from clock_pattern import SystemClock` | Production clock backed by system time in a configured timezone. |
 | [`UtcClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/utc_clock.py) | `from clock_pattern import UtcClock` | Production clock fixed to UTC. |
+
+### Elapsed-Time API
+
+| API | Import path | Purpose |
+| --- | --- | --- |
 | `MonotonicClock` | `from clock_pattern import MonotonicClock` | Abstract contract for elapsed-time sources. |
 | `SystemMonotonicClock` | `from clock_pattern import SystemMonotonicClock` | Production monotonic clock for elapsed-time measurement. |
+| `Sleeper` / `SleeperAsync` | `from clock_pattern import Sleeper, SleeperAsync` | Abstract contracts for injectable sync and async sleeping. |
 | `SystemSleeper` / `SystemSleeperAsync` | `from clock_pattern import SystemSleeper, SystemSleeperAsync` | Injectable sync and async sleeping. |
 | `Stopwatch` | `from clock_pattern import Stopwatch` | Measure elapsed seconds with `.start()`, `.end()`, or a context manager. |
+| `Deadline` | `from clock_pattern import Deadline` | Abstract contract for injectable deadline state. |
+| `SystemDeadline` | `from clock_pattern import SystemDeadline` | Monotonic deadline with an interrupting Unix main-thread context. |
+| `TimeoutExpiredError` | `from clock_pattern import TimeoutExpiredError` | Error raised when a deadline or poll timeout expires. |
+| `Poller` / `PollerAsync` | `from clock_pattern import Poller, PollerAsync` | Abstract contracts for condition polling. |
+| `SystemPoller` / `SystemPollerAsync` | `from clock_pattern import SystemPoller, SystemPollerAsync` | Production polling implementations. |
+| `Retrier` / `RetrierAsync` | `from clock_pattern import Retrier, RetrierAsync` | Abstract contracts for retrying operations. |
+| `SystemRetrier` / `SystemRetrierAsync` | `from clock_pattern import SystemRetrier, SystemRetrierAsync` | Production retry implementations. |
+
+### Test Doubles
+
+| API | Import path | Purpose |
+| --- | --- | --- |
 | [`FixedClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/testing/fixed_clock.py) | `from clock_pattern.clocks.testing import FixedClock` | Test clock that always returns the same datetime and derived date. |
 | [`MockClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/testing/mock_clock.py) | `from clock_pattern.clocks.testing import MockClock` | Test clock with prepared return values and call assertions. |
+| `MockMonotonicClock` | `from clock_pattern.monotonic_clocks.testing import MockMonotonicClock` | Controllable elapsed-time source with call assertions. |
+| `MockDeadline` | `from clock_pattern.deadlines.testing import MockDeadline` | Controllable deadline with expiry call assertions. |
+| `MockSleeper` / `MockSleeperAsync` | `from clock_pattern.sleepers.testing import MockSleeper, MockSleeperAsync` | Sleeping test doubles that advance a mock monotonic clock. |
+| `MockPoller` / `MockPollerAsync` | `from clock_pattern.pollers.testing import MockPoller, MockPollerAsync` | Polling test doubles with call assertions. |
+| `MockRetrier` / `MockRetrierAsync` | `from clock_pattern.retriers.testing import MockRetrier, MockRetrierAsync` | Retry test doubles with prepared results. |
 
-Use the top-level package for production clocks and `clock_pattern.clocks.testing` for test-only clocks.
+```python
+from clock_pattern import Stopwatch, SystemDeadline, SystemMonotonicClock, SystemPoller, SystemRetrier, SystemSleeper
+
+monotonic_clock = SystemMonotonicClock()
+sleeper = SystemSleeper(monotonic_clock=monotonic_clock)
+poller = SystemPoller(sleeper=sleeper, monotonic_clock=monotonic_clock)
+
+with Stopwatch(monotonic_clock=monotonic_clock) as stopwatch:
+    pass
+
+with sleeper.minimum_duration(seconds=2):
+    pass
+
+with SystemDeadline(seconds=5, monotonic_clock=monotonic_clock):
+    pass
+
+poller.poll_until(condition=lambda: True, timeout_seconds=5, interval_seconds=0.1)
+SystemRetrier(sleeper=sleeper).retry(
+    operation=lambda: 'done',
+    attempts=3,
+    delay_seconds=0.2,
+    backoff=2,
+    jitter=True,
+)
+```
+
+`SystemDeadline` context managers use `SIGALRM` to interrupt Python code and interruptible system calls. Context use is
+limited to Unix main-thread execution, cannot be nested or share an existing alarm, and may be delayed by C code that
+does not return control to the Python interpreter. Deadline properties and `raise_if_expired()` remain cooperative when
+used outside a context manager. `TimeoutExpiredError.elapsed_seconds` exposes the measured elapsed duration reported by
+either timeout path.
 
 <p align="right">
     <a href="#readme-top">🔼 Back to top</a>
@@ -178,8 +237,8 @@ Use the top-level package for production clocks and `clock_pattern.clocks.testin
 
 ## 🌍 Timezone Behavior
 
-`SystemClock` accepts either an IANA timezone string or a `tzinfo` instance. It stores the timezone with `ZoneInfo` and
-uses it for both `now()` and `today()`.
+`SystemClock` accepts either an IANA timezone string or a `tzinfo` instance. It converts strings to `ZoneInfo`, preserves
+`tzinfo` instances directly, and uses the resulting timezone for both `now()` and `today()`.
 
 ```python
 from datetime import UTC

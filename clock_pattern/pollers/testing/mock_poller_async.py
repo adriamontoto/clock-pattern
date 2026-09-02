@@ -74,6 +74,16 @@ class MockPollerAsync(PollerAsync):
             ValueError: If `interval_seconds` is not positive.
             TypeError: If `condition` does not return a boolean.
             TimeoutExpiredError: If the timeout expires before `condition` returns `True`.
+
+        Example:
+        ```python
+        from clock_pattern.pollers.testing import MockPollerAsync
+
+        poller = MockPollerAsync()
+        condition = lambda: True
+        await poller.poll_until(condition=condition, timeout_seconds=1)
+        poller.assert_poll_until_method_was_called_once_with(condition=condition, timeout_seconds=1)
+        ```
         """
         PositiveOrZeroNumberValueObject(value=timeout_seconds, title='MockPollerAsync', parameter='timeout_seconds')
         PositiveNumberValueObject(value=interval_seconds, title='MockPollerAsync', parameter='interval_seconds')
@@ -94,6 +104,14 @@ class MockPollerAsync(PollerAsync):
         Args:
             exception (BaseException): Exception raised by `poll_until()`.
 
+        Example:
+        ```python
+        from clock_pattern import TimeoutExpiredError
+        from clock_pattern.pollers.testing import MockPollerAsync
+
+        poller = MockPollerAsync()
+        poller.prepare_poll_until_method_exception(exception=TimeoutExpiredError(elapsed_seconds=1.0))
+        ```
         """
         self._exception = exception
 
@@ -118,6 +136,16 @@ class MockPollerAsync(PollerAsync):
             TypeError: If `interval_seconds` is not an integer or a float.
             ValueError: If `interval_seconds` is not positive.
             TypeError: If `condition` does not return a boolean.
+
+        Example:
+        ```python
+        from clock_pattern.pollers.testing import MockPollerAsync
+
+        poller = MockPollerAsync()
+        condition = lambda: True
+        await poller.poll_until(condition=condition, timeout_seconds=1)
+        poller.assert_poll_until_method_was_called_once_with(condition=condition, timeout_seconds=1)
+        ```
         """
         PositiveOrZeroNumberValueObject(value=timeout_seconds, title='MockPollerAsync', parameter='timeout_seconds')
         PositiveNumberValueObject(value=interval_seconds, title='MockPollerAsync', parameter='interval_seconds')

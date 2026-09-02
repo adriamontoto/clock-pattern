@@ -34,6 +34,9 @@ clock = SystemClock(timezone='America/New_York')
 The timezone string must be valid for Python's `zoneinfo.ZoneInfo`. Empty strings, untrimmed strings, invalid names, and
 unsupported types are rejected by the underlying value-object validators.
 
+You can also pass a `datetime.tzinfo` instance, including a fixed-offset or custom timezone. `SystemClock` preserves that
+instance instead of converting it to `ZoneInfo`.
+
 ## `today()` Follows The Clock Timezone
 
 `today()` is calculated from `datetime.now(tz=clock.timezone).date()`. This matters near midnight:
@@ -72,4 +75,3 @@ Timezone-aware datetimes are preserved as provided.
 - Treat `today()` as timezone-sensitive.
 - Avoid comparing date-only values produced by clocks with different timezone assumptions.
 - Prefer fixed test clocks for date-boundary cases so tests do not depend on the current real time.
-

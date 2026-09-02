@@ -85,12 +85,29 @@ class MockMonotonicClock(MonotonicClock):
     def assert_current_seconds_method_was_called_once(self) -> None:
         """
         Assert that `current_seconds()` was called exactly once.
+
+        Example:
+        ```python
+        from clock_pattern.monotonic_clocks.testing import MockMonotonicClock
+
+        monotonic_clock = MockMonotonicClock()
+        monotonic_clock.current_seconds()
+        monotonic_clock.assert_current_seconds_method_was_called_once()
+        ```
         """
         self._current_seconds_mock.assert_called_once_with()
 
     def assert_current_seconds_method_was_not_called(self) -> None:
         """
         Assert that `current_seconds()` was not called.
+
+        Example:
+        ```python
+        from clock_pattern.monotonic_clocks.testing import MockMonotonicClock
+
+        monotonic_clock = MockMonotonicClock()
+        monotonic_clock.assert_current_seconds_method_was_not_called()
+        ```
         """
         self._current_seconds_mock.assert_not_called()
 

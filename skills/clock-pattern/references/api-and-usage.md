@@ -17,12 +17,16 @@ from clock_pattern import (
     SleeperAsync,
     Stopwatch,
     SystemClock,
+    SystemDeadline,
     SystemMonotonicClock,
+    SystemPoller,
+    SystemPollerAsync,
+    SystemRetrier,
+    SystemRetrierAsync,
     SystemSleeper,
     SystemSleeperAsync,
     TimeoutExpiredError,
     UtcClock,
-    deadline,
 )
 ```
 
@@ -80,7 +84,7 @@ class LogicalClock(Clock):
 - `SystemSleeper` and `SystemSleeperAsync` are production implementations.
 
 ```python
-from clock_pattern import Sleeper, SystemSleeper
+from clock_pattern import Sleeper, SystemMonotonicClock, SystemSleeper
 
 
 class UseCase:
@@ -89,10 +93,10 @@ class UseCase:
 
     def execute(self) -> None:
         with self._sleeper.minimum_duration(seconds=2):
-            run_external_step()
+            pass
 
 
-use_case = UseCase(sleeper=SystemSleeper())
+use_case = UseCase(sleeper=SystemSleeper(monotonic_clock=SystemMonotonicClock()))
 ```
 
 ## Monotonic Time
@@ -102,7 +106,7 @@ time is not affected by wall-clock changes, DST changes, or timezone boundaries.
 
 ## Stopwatch
 
-`Stopwatch(monotonic_clock=None)` measures elapsed seconds.
+`Stopwatch(monotonic_clock=...)` measures elapsed seconds.
 
 - `.start()` starts the stopwatch and returns itself.
 - `.end()` stops the stopwatch and returns elapsed seconds.
@@ -111,51 +115,62 @@ time is not affected by wall-clock changes, DST changes, or timezone boundaries.
 - It can be used as a context manager.
 
 ```python
-from clock_pattern import Stopwatch
+from clock_pattern import Stopwatch, SystemMonotonicClock
 
-with Stopwatch() as stopwatch:
-    process_batch()
+with Stopwatch(monotonic_clock=SystemMonotonicClock()) as stopwatch:
+    pass
 
 print(stopwatch.elapsed_seconds)
 ```
 
 ## Deadlines
 
-Use `Deadline(seconds=..., monotonic_clock=None, raise_on_exit=False)` or the `deadline()` factory for cooperative
-timeouts.
+Use `Deadline` as the injectable contract. Create a production timeout with
+`SystemDeadline(seconds=..., monotonic_clock=...)`.
 
 - `.elapsed_seconds` and `.remaining_seconds` expose timing state.
 - `.expired` reports whether the timeout has elapsed.
-- `.raise_if_expired()` raises `TimeoutExpiredError` after expiry.
-- Deadlines are cooperative: they do not interrupt arbitrary blocking work.
+- `.raise_if_expired()` raises `TimeoutExpiredError` after expiry; `error.elapsed_seconds` contains the measured elapsed
+  duration as a float.
+- `SystemDeadline` context managers interrupt Python code and interruptible system calls with a Unix main-thread
+  `SIGALRM` timer.
+- Context use cannot run on Windows or a worker thread, be nested, or replace another `SIGALRM` owner.
+- Long-running C code may delay signal handling; properties and `raise_if_expired()` remain cooperative outside a
+  context.
 
 ```python
-from clock_pattern import TimeoutExpiredError, deadline
+from clock_pattern import SystemDeadline, SystemMonotonicClock, TimeoutExpiredError
 
 try:
-    with deadline(seconds=5) as timeout:
-        while not job_is_done():
-            timeout.raise_if_expired()
-except TimeoutExpiredError:
-    handle_timeout()
+    with SystemDeadline(seconds=5, monotonic_clock=SystemMonotonicClock()):
+        pass
+except TimeoutExpiredError as error:
+    print(error.elapsed_seconds)
 ```
 
 ## Polling
 
-Use `Poller().poll_until(condition=..., timeout_seconds=..., interval_seconds=0.1)` when success is a predicate. It
-raises `TimeoutExpiredError` when the timeout expires.
+Use `Poller` as the injectable contract. In production, construct a `SystemMonotonicClock`, inject it into a
+`SystemSleeper` and `SystemPoller`, then call
+`poller.poll_until(condition=..., timeout_seconds=..., interval_seconds=0.1)` when success is a predicate. It raises
+`TimeoutExpiredError` when the timeout expires.
 
-Use `PollerAsync` for async code. The async poller accepts sync or async conditions.
+Use `PollerAsync` as the async contract and `SystemPollerAsync` as its production implementation. Inject a
+`SystemSleeperAsync` and their shared monotonic clock. The async poller accepts sync or async conditions.
 
 ## Retrying
 
-Use `Retrier().retry(...)` for sync operations that should retry on configured exceptions.
+Use `Retrier` as the injectable contract and `SystemRetrier` as the production implementation for sync operations that
+should retry on configured exceptions.
 
 ```python
-from clock_pattern import Retrier
+from clock_pattern import SystemMonotonicClock, SystemRetrier, SystemSleeper
 
-result = Retrier().retry(
-    operation=lambda: client.send(message),
+monotonic_clock = SystemMonotonicClock()
+sleeper = SystemSleeper(monotonic_clock=monotonic_clock)
+
+result = SystemRetrier(sleeper=sleeper).retry(
+    operation=lambda: 'done',
     attempts=3,
     delay_seconds=0.2,
     backoff=2,
@@ -171,4 +186,4 @@ result = Retrier().retry(
 - `retry_on` defaults to `Exception` and may be an exception type or non-empty tuple of exception types.
 - Falsey successful return values are returned; only configured exceptions trigger retry.
 
-Use `RetrierAsync` for async operations.
+Use `RetrierAsync` as the async contract and `SystemRetrierAsync` as its production implementation.

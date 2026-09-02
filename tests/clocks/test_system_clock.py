@@ -2,7 +2,7 @@
 Test SystemClock clock.
 """
 
-from datetime import date, datetime, tzinfo
+from datetime import date, datetime, timedelta, timezone, tzinfo
 
 from object_mother_pattern.mothers import StringMother
 from object_mother_pattern.mothers.dates import StringTimezoneMother, TimezoneMother
@@ -109,3 +109,15 @@ def test_system_clock_timezone_property() -> None:
 
     assert isinstance(clock.timezone, tzinfo)
     assert clock.timezone == timezone
+
+
+@mark.unit_testing
+def test_system_clock_preserves_fixed_offset_timezone() -> None:
+    """
+    Test SystemClock preserves a fixed-offset tzinfo instance.
+    """
+    fixed_offset_timezone = timezone(offset=timedelta(hours=5, minutes=30))
+    clock = SystemClock(timezone=fixed_offset_timezone)
+
+    assert clock.timezone is fixed_offset_timezone
+    assert clock.now().tzinfo is fixed_offset_timezone
