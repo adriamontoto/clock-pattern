@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v0.10.0 (2026-09-02)
+
+### 📦 Build System
+
+- Add constraint for clock dependency
+  ([`311c5e1`](https://github.com/adriamontoto/clock-pattern/commit/311c5e1eac3da9b30154e79b27418e25c525b6a2))
+
+### ✨ Features
+
+- Implement deadlines
+  ([`bb9b51b`](https://github.com/adriamontoto/clock-pattern/commit/bb9b51b6358404ab183930a83af408bec3c0f1ac))
+
+- Implement pollers
+  ([`2e9ebcb`](https://github.com/adriamontoto/clock-pattern/commit/2e9ebcba1794d201aca10bfa09256a8f65da05c4))
+
+- Implement retriers
+  ([`99bb631`](https://github.com/adriamontoto/clock-pattern/commit/99bb6314cd8ae22eb1fc7adc6168cbc2ad85981f))
+
+
 ## v0.9.0 (2026-08-23)
 
 ### ✨ Features
