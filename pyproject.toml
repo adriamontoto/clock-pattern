@@ -70,6 +70,10 @@ all = [
 ]
 
 
+[tool.uv]
+constraint-dependencies = ['click>=8.3.3'] # PYSEC-2026-2132
+
+
 [tool.pytest.ini_options]
 pythonpath = '.'
 addopts = [
