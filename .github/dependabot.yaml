@@ -19,9 +19,6 @@ updates:
           - patch
     cooldown:
       default-days: 7
-      semver-major-days: 30
-      semver-minor-days: 7
-      semver-patch-days: 3
 
   - package-ecosystem: pre-commit
     directory: /
@@ -41,9 +38,6 @@ updates:
           - patch
     cooldown:
       default-days: 7
-      semver-major-days: 30
-      semver-minor-days: 7
-      semver-patch-days: 3
 
   - package-ecosystem: uv
     directory: /
