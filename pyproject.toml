@@ -38,7 +38,7 @@ keywords = [
     'domain-driven-design',
 ]
 requires-python = '>=3.11'
-dependencies = ['value-object-pattern>=1.31.0']
+dependencies = ['value-object-pattern>=1.36.0']
 dynamic = ['version']
 
 [project.urls]
@@ -51,7 +51,7 @@ Issues = 'https://github.com/adriamontoto/clock-pattern/issues'
 coverage = ['coverage[toml]>=7.0.0', 'smokeshow>=0.5.0']
 develop = ['pre-commit>=3.0.0']
 format = ['ruff>=0.11.10']
-lint = ['ruff>=0.11.10', 'mypy[reports]>=1.0.0', { include-group = 'test' }]
+lint = ['ruff>=0.11.10', 'ty>=0.0.77', { include-group = 'test' }]
 release = ['build>=1.2.2', 'python-semantic-release>=10.0.2']
 test = [
     'pytest>=8.0.0',
@@ -109,7 +109,7 @@ source = ['clock_pattern']
 [tool.ruff]
 indent-width = 4
 line-length = 120
-target-version = 'py313'
+target-version = 'py314'
 output-format = 'grouped'
 
 [tool.ruff.format]
@@ -121,6 +121,7 @@ skip-magic-trailing-comma = false
 
 [tool.ruff.lint]
 select = [
+    'ANN',  # flake8-annotations
     'F',    # pyflakes
     'S',    # flake8-bandit
     'B',    # flake8-bugbear
@@ -131,6 +132,7 @@ select = [
     'C90',  # mccabe
     'N',    # pep8-naming
     'PERF', # perflint
+    'PYI',  # flake8-pyi
     'E',    # pycodestyle
     'W',    # pycodestyle
     'D',    # pydocstyle
@@ -151,6 +153,7 @@ ignore = [
     'D401',   # First line of docstring should be in imperative mood.
     'D300',   # Checks for docstrings that use '''triple single quotes''' instead of 'triple double quotes'.
     'RUF100', # Checks for unused noqa directives.
+    'RUF043', # Checks for containing groups in patterns in match= statements.
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -174,15 +177,11 @@ known-first-party = ['clock_pattern']
 combine-as-imports = true
 
 
-[tool.mypy]
-strict = true
-warn_unreachable = true
-enable_error_code = [
-    'redundant-expr',
-    'possibly-undefined',
-    'truthy-bool',
-    'explicit-override',
-]
+[tool.ty.rules]
+missing-override-decorator = 'error'
+missing-type-argument = 'error'
+possibly-unresolved-reference = 'warn'
+unsound-return-statement = 'error'
 
 
 [tool.semantic_release]
