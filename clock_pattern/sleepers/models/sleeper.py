@@ -21,12 +21,12 @@ class Sleeper(ABC):
     """
 
     @abstractmethod
-    def sleep(self, *, seconds: int | float) -> None:
+    def sleep(self, *, seconds: float) -> None:
         """
         Pause synchronous execution for `seconds`.
 
         Args:
-            seconds (int | float): The number of seconds to pause execution.
+            seconds (float): The number of seconds to pause execution.
 
         Example:
         ```python
@@ -39,12 +39,12 @@ class Sleeper(ABC):
         """
 
     @abstractmethod
-    def minimum_duration(self, *, seconds: int | float) -> AbstractContextManager[None]:
+    def minimum_duration(self, *, seconds: float) -> AbstractContextManager[None]:
         """
         Create a context manager that ensures the enclosed work takes at least `seconds`.
 
         Args:
-            seconds (int | float): The minimum duration the enclosed work should take.
+            seconds (float): The minimum duration the enclosed work should take.
 
         Returns:
             AbstractContextManager[None]: A context manager that enforces the minimum duration.

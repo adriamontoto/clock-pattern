@@ -75,8 +75,8 @@ class MockRetrier(Retrier):
         *,
         operation: Callable[[], T],
         attempts: int,
-        delay_seconds: int | float = 0.0,
-        backoff: int | float = 1.0,
+        delay_seconds: float = 0.0,
+        backoff: float = 1.0,
         jitter: bool = False,
         retry_on: type[Exception] | tuple[type[Exception], ...] = Exception,
     ) -> T:
@@ -86,9 +86,9 @@ class MockRetrier(Retrier):
         Args:
             operation (Callable[[], T]): Operation to execute.
             attempts (int): Maximum number of attempts, including the first call.
-            delay_seconds (int | float, optional): Finite, non-negative initial delay between failed attempts. Defaults
+            delay_seconds (float, optional): Finite, non-negative initial delay between failed attempts. Defaults
             to 0.0 seconds.
-            backoff (int | float, optional): Finite, positive multiplier applied to the delay after each failed attempt.
+            backoff (float, optional): Finite, positive multiplier applied to the delay after each failed attempt.
             Defaults to 1.0 (no backoff).
             jitter (bool, optional): Whether to randomize each delay. Defaults to `False`.
             retry_on (type[Exception] | tuple[type[Exception], ...], optional): Exception types that should be retried.
@@ -194,8 +194,8 @@ class MockRetrier(Retrier):
         *,
         operation: Callable[[], Any],
         attempts: int,
-        delay_seconds: int | float = 0.0,
-        backoff: int | float = 1.0,
+        delay_seconds: float = 0.0,
+        backoff: float = 1.0,
         jitter: bool = False,
         retry_on: type[Exception] | tuple[type[Exception], ...] = Exception,
     ) -> None:
@@ -205,8 +205,8 @@ class MockRetrier(Retrier):
         Args:
             operation (Callable[[], Any]): Expected operation callable.
             attempts (int): Expected maximum number of attempts.
-            delay_seconds (int | float, optional): Expected finite, non-negative initial delay. Defaults to 0.0 seconds.
-            backoff (int | float, optional): Expected finite, positive delay multiplier. Defaults to 1.0.
+            delay_seconds (float, optional): Expected finite, non-negative initial delay. Defaults to 0.0 seconds.
+            backoff (float, optional): Expected finite, positive delay multiplier. Defaults to 1.0.
             jitter (bool, optional): Expected jitter flag. Defaults to False.
             retry_on (type[Exception] | tuple[type[Exception], ...], optional): Expected retryable exception types.
             Defaults to `Exception` (retry on any exception).

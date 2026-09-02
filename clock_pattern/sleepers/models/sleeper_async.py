@@ -21,12 +21,12 @@ class SleeperAsync(ABC):
     """
 
     @abstractmethod
-    async def sleep(self, *, seconds: int | float) -> None:
+    async def sleep(self, *, seconds: float) -> None:
         """
         Pause asynchronous execution for `seconds`.
 
         Args:
-            seconds (int | float): The number of seconds to pause execution.
+            seconds (float): The number of seconds to pause execution.
 
         Example:
         ```python
@@ -39,12 +39,12 @@ class SleeperAsync(ABC):
         """
 
     @abstractmethod
-    def minimum_duration(self, *, seconds: int | float) -> AbstractAsyncContextManager[None]:
+    def minimum_duration(self, *, seconds: float) -> AbstractAsyncContextManager[None]:
         """
         Create an async context manager that ensures the enclosed work takes at least `seconds`.
 
         Args:
-            seconds (int | float): The minimum duration the enclosed work should take.
+            seconds (float): The minimum duration the enclosed work should take.
 
         Returns:
             AbstractAsyncContextManager[None]: An async context manager that enforces the minimum duration.

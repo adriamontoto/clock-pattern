@@ -54,12 +54,12 @@ class SystemSleeper(Sleeper):
         self._monotonic_clock = monotonic_clock
 
     @override
-    def sleep(self, *, seconds: int | float) -> None:
+    def sleep(self, *, seconds: float) -> None:
         """
         Pause synchronous execution for `seconds`.
 
         Args:
-            seconds (int | float): The number of seconds to pause execution.
+            seconds (float): The number of seconds to pause execution.
 
         Raises:
             TypeError: If `seconds` is not an integer or float.
@@ -80,12 +80,12 @@ class SystemSleeper(Sleeper):
 
     @override
     @contextmanager
-    def minimum_duration(self, *, seconds: int | float) -> Iterator[None]:
+    def minimum_duration(self, *, seconds: float) -> Iterator[None]:
         """
         Create a context manager that ensures the enclosed work takes at least `seconds`.
 
         Args:
-            seconds (int | float): The minimum elapsed duration for the enclosed synchronous work.
+            seconds (float): The minimum elapsed duration for the enclosed synchronous work.
 
         Raises:
             TypeError: If `seconds` is not an integer or float.

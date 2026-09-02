@@ -34,12 +34,12 @@ class MockMonotonicClock(MonotonicClock):
     _current_seconds: PositiveOrZeroNumberValueObject
     _current_seconds_mock: Mock
 
-    def __init__(self, *, current_seconds: int | float = 0.0) -> None:
+    def __init__(self, *, current_seconds: float = 0.0) -> None:
         """
         Create a mock monotonic clock.
 
         Args:
-            current_seconds (int | float): Initial monotonic timestamp in seconds. Defaults to zero.
+            current_seconds (float): Initial monotonic timestamp in seconds. Defaults to zero.
 
         Raises:
             TypeError: If `current_seconds` is not an integer or float.
@@ -94,12 +94,12 @@ class MockMonotonicClock(MonotonicClock):
         """
         self._current_seconds_mock.assert_not_called()
 
-    def advance(self, *, seconds: int | float) -> None:
+    def advance(self, *, seconds: float) -> None:
         """
         Advance the clock by `seconds`.
 
         Args:
-            seconds (int | float): Seconds to add to the current timestamp.
+            seconds (float): Seconds to add to the current timestamp.
 
         Raises:
             TypeError: If `seconds` is not an integer or float.
@@ -123,12 +123,12 @@ class MockMonotonicClock(MonotonicClock):
             parameter='current_seconds',
         )
 
-    def set_current_seconds(self, *, current_seconds: int | float) -> None:
+    def set_current_seconds(self, *, current_seconds: float) -> None:
         """
         Set the current monotonic timestamp.
 
         Args:
-            current_seconds (int | float): Replacement monotonic timestamp in seconds.
+            current_seconds (float): Replacement monotonic timestamp in seconds.
 
         Raises:
             TypeError: If `current_seconds` is not an integer or float.

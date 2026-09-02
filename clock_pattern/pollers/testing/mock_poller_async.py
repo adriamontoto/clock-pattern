@@ -56,16 +56,16 @@ class MockPollerAsync(PollerAsync):
         self,
         *,
         condition: Callable[[], bool | Awaitable[bool]],
-        timeout_seconds: int | float,
-        interval_seconds: int | float = 0.1,
+        timeout_seconds: float,
+        interval_seconds: float = 0.1,
     ) -> None:
         """
         Record an async poll call and optionally raise the prepared exception.
 
         Args:
             condition (Callable[[], bool | Awaitable[bool]]): Condition passed by the code under test.
-            timeout_seconds (int | float): Timeout requested by the code under test.
-            interval_seconds (int | float): Poll interval requested by the code under test.
+            timeout_seconds (float): Timeout requested by the code under test.
+            interval_seconds (float): Poll interval requested by the code under test.
 
         Raises:
             TypeError: If `timeout_seconds` is not an integer or a float.
@@ -101,16 +101,16 @@ class MockPollerAsync(PollerAsync):
         self,
         *,
         condition: Callable[[], bool | Awaitable[bool]],
-        timeout_seconds: int | float,
-        interval_seconds: int | float = 0.1,
+        timeout_seconds: float,
+        interval_seconds: float = 0.1,
     ) -> None:
         """
         Assert that `poll_until()` was awaited exactly once with the provided arguments.
 
         Args:
             condition (Callable[[], bool | Awaitable[bool]]): Expected condition callable.
-            timeout_seconds (int | float): Expected timeout.
-            interval_seconds (int | float): Expected poll interval.
+            timeout_seconds (float): Expected timeout.
+            interval_seconds (float): Expected poll interval.
 
         Raises:
             TypeError: If `timeout_seconds` is not an integer or a float.

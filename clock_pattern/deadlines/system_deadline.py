@@ -45,12 +45,12 @@ class SystemDeadline(Deadline):
     _previous_signal_handler: signal_module.Handlers
     _previous_timer: tuple[float, float]
 
-    def __init__(self, *, seconds: int | float, monotonic_clock: MonotonicClock) -> None:
+    def __init__(self, *, seconds: float, monotonic_clock: MonotonicClock) -> None:
         """
         Create a system deadline that starts immediately.
 
         Args:
-            seconds (int | float): Duration before the deadline expires.
+            seconds (float): Duration before the deadline expires.
             monotonic_clock (MonotonicClock): Monotonic clock used to measure elapsed seconds.
 
         Raises:

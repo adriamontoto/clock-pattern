@@ -63,16 +63,16 @@ class SystemPoller(Poller):
         self,
         *,
         condition: Callable[[], bool],
-        timeout_seconds: int | float,
-        interval_seconds: int | float = 0.1,
+        timeout_seconds: float,
+        interval_seconds: float = 0.1,
     ) -> None:
         """
         Poll `condition` until it returns `True`.
 
         Args:
             condition (Callable[[], bool]): Condition checked until it returns `True`.
-            timeout_seconds (int | float): Maximum duration to wait.
-            interval_seconds (int | float): Duration between condition checks. Defaults to `0.1`.
+            timeout_seconds (float): Maximum duration to wait.
+            interval_seconds (float): Duration between condition checks. Defaults to `0.1`.
 
         Raises:
             TypeError: If `timeout_seconds` is not an integer or a float.

@@ -54,12 +54,12 @@ class SystemSleeperAsync(SleeperAsync):
         self._monotonic_clock = monotonic_clock
 
     @override
-    async def sleep(self, *, seconds: int | float) -> None:
+    async def sleep(self, *, seconds: float) -> None:
         """
         Pause asynchronous execution for `seconds`.
 
         Args:
-            seconds (int | float): The number of seconds to pause execution.
+            seconds (float): The number of seconds to pause execution.
 
         Raises:
             TypeError: If `seconds` is not an integer or float.
@@ -80,12 +80,12 @@ class SystemSleeperAsync(SleeperAsync):
 
     @override
     @asynccontextmanager
-    async def minimum_duration(self, *, seconds: int | float) -> AsyncIterator[None]:
+    async def minimum_duration(self, *, seconds: float) -> AsyncIterator[None]:
         """
         Create an async context manager that ensures the enclosed work takes at least `seconds`.
 
         Args:
-            seconds (int | float): The minimum elapsed duration for the enclosed asynchronous work.
+            seconds (float): The minimum elapsed duration for the enclosed asynchronous work.
 
         Raises:
             TypeError: If `seconds` is not an integer or float.

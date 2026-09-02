@@ -37,13 +37,13 @@ class MockDeadline(Deadline):
     _elapsed_seconds: PositiveOrZeroNumberValueObject
     _raise_if_expired_mock: Mock
 
-    def __init__(self, *, seconds: int | float, elapsed_seconds: int | float = 0.0) -> None:
+    def __init__(self, *, seconds: float, elapsed_seconds: float = 0.0) -> None:
         """
         Create a mock deadline.
 
         Args:
-            seconds (int | float): Duration before the deadline expires.
-            elapsed_seconds (int | float, optional): Initial elapsed duration. Defaults to `0.0`.
+            seconds (float): Duration before the deadline expires.
+            elapsed_seconds (float, optional): Initial elapsed duration. Defaults to `0.0`.
 
         Raises:
             TypeError: If seconds is not an integer or float.
@@ -147,12 +147,12 @@ class MockDeadline(Deadline):
         if elapsed_seconds >= self._seconds.value:
             raise TimeoutExpiredError(elapsed_seconds=elapsed_seconds)
 
-    def advance(self, *, seconds: int | float) -> None:
+    def advance(self, *, seconds: float) -> None:
         """
         Advance elapsed time by `seconds`.
 
         Args:
-            seconds (int | float): Seconds to add to the elapsed duration.
+            seconds (float): Seconds to add to the elapsed duration.
 
         Raises:
             TypeError: If `seconds` is not an integer or float.

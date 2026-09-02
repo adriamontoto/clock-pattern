@@ -62,12 +62,12 @@ class MockSleeperAsync(SleeperAsync):
         self._sleep_calls = []
 
     @override
-    async def sleep(self, *, seconds: int | float) -> None:
+    async def sleep(self, *, seconds: float) -> None:
         """
         Record an async sleep call and advance the monotonic clock.
 
         Args:
-            seconds (int | float): Seconds to record and advance.
+            seconds (float): Seconds to record and advance.
 
         Raises:
             TypeError: If `seconds` is not an integer or float.
@@ -90,12 +90,12 @@ class MockSleeperAsync(SleeperAsync):
         self._sleep_calls.append(seconds)
         self._monotonic_clock.advance(seconds=seconds)
 
-    def assert_sleep_method_was_called_once_with(self, *, seconds: int | float) -> None:
+    def assert_sleep_method_was_called_once_with(self, *, seconds: float) -> None:
         """
         Assert that `sleep()` was awaited exactly once with `seconds`.
 
         Args:
-            seconds (int | float): Expected sleep duration.
+            seconds (float): Expected sleep duration.
 
         Raises:
             TypeError: If `seconds` is not an integer or float.
@@ -134,12 +134,12 @@ class MockSleeperAsync(SleeperAsync):
 
     @override
     @asynccontextmanager
-    async def minimum_duration(self, *, seconds: int | float) -> AsyncIterator[None]:
+    async def minimum_duration(self, *, seconds: float) -> AsyncIterator[None]:
         """
         Create an async context manager that ensures the enclosed work takes at least `seconds`.
 
         Args:
-            seconds (int | float): The minimum elapsed duration for the enclosed asynchronous work.
+            seconds (float): The minimum elapsed duration for the enclosed asynchronous work.
 
         Raises:
             TypeError: If `seconds` is not an integer or float.

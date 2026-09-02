@@ -35,16 +35,16 @@ class PollerAsync(ABC):
         self,
         *,
         condition: Callable[[], bool | Awaitable[bool]],
-        timeout_seconds: int | float,
-        interval_seconds: int | float = 0.1,
+        timeout_seconds: float,
+        interval_seconds: float = 0.1,
     ) -> None:
         """
         Poll a condition until it succeeds or the timeout expires.
 
         Args:
             condition (Callable[[], bool | Awaitable[bool]]): Sync or async condition checked until it succeeds.
-            timeout_seconds (int | float): Maximum duration to wait.
-            interval_seconds (int | float, optional): Duration between condition checks. Defaults to 0.1 seconds.
+            timeout_seconds (float): Maximum duration to wait.
+            interval_seconds (float, optional): Duration between condition checks. Defaults to 0.1 seconds.
 
         Example:
         ```python
