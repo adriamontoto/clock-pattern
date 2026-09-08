@@ -124,7 +124,7 @@ Its `minimum_duration()` context pads successful work and ordinary errors, but p
 Use `Stopwatch` for elapsed-time measurement, `Deadline` as the injectable timeout contract, and `SystemDeadline` for a production monotonic deadline.
 
 ```python
-from clock_pattern import Stopwatch, SystemDeadline, SystemMonotonicClock
+from clock_pattern import Stopwatch, SystemMonotonicClock
 
 monotonic_clock = SystemMonotonicClock()
 
@@ -132,7 +132,11 @@ with Stopwatch(monotonic_clock=monotonic_clock) as stopwatch:
     pass
 
 print(stopwatch.elapsed_seconds)
+```
+```python unix
+from clock_pattern import SystemDeadline, SystemMonotonicClock
 
+monotonic_clock = SystemMonotonicClock()
 with SystemDeadline(seconds=5, monotonic_clock=monotonic_clock):
     pass
 ```

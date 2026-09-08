@@ -30,7 +30,7 @@ class SystemDeadline(Deadline):
     Expose monotonic deadline state and enforce Unix main-thread context timeouts.
 
     Example:
-    ```python
+    ```python unix
     from clock_pattern import SystemDeadline, SystemMonotonicClock
 
     with SystemDeadline(seconds=1, monotonic_clock=SystemMonotonicClock()) as deadline:
@@ -182,7 +182,7 @@ class SystemDeadline(Deadline):
             Self: This deadline instance.
 
         Example:
-        ```python
+        ```python unix
         from clock_pattern import SystemDeadline, SystemMonotonicClock
 
         with SystemDeadline(seconds=1, monotonic_clock=SystemMonotonicClock()) as deadline:
@@ -251,7 +251,7 @@ class SystemDeadline(Deadline):
             bool | None: `None`, so exceptions from the managed block are not suppressed.
 
         Example:
-        ```python
+        ```python unix
         from clock_pattern import SystemDeadline, SystemMonotonicClock
 
         with SystemDeadline(seconds=1, monotonic_clock=SystemMonotonicClock()) as deadline:

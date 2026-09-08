@@ -194,20 +194,36 @@ Use the top-level package for contracts and production helpers, and each feature
 | `MockRetrier` / `MockRetrierAsync` | `from clock_pattern.retriers.testing import MockRetrier, MockRetrierAsync` | Retry test doubles with prepared results. |
 
 ```python
-from clock_pattern import Stopwatch, SystemDeadline, SystemMonotonicClock, SystemPoller, SystemRetrier, SystemSleeper
+from clock_pattern import Stopwatch, SystemMonotonicClock, SystemSleeper
 
 monotonic_clock = SystemMonotonicClock()
 sleeper = SystemSleeper(monotonic_clock=monotonic_clock)
-poller = SystemPoller(sleeper=sleeper, monotonic_clock=monotonic_clock)
 
 with Stopwatch(monotonic_clock=monotonic_clock) as stopwatch:
     pass
 
 with sleeper.minimum_duration(seconds=0.001):
     pass
+```
 
+The deadline context requires a Unix main thread:
+
+```python unix
+from clock_pattern import SystemDeadline, SystemMonotonicClock
+
+monotonic_clock = SystemMonotonicClock()
 with SystemDeadline(seconds=5, monotonic_clock=monotonic_clock):
     pass
+```
+
+Continue with polling and retries on all platforms:
+
+```python
+from clock_pattern import SystemMonotonicClock, SystemPoller, SystemRetrier, SystemSleeper
+
+monotonic_clock = SystemMonotonicClock()
+sleeper = SystemSleeper(monotonic_clock=monotonic_clock)
+poller = SystemPoller(sleeper=sleeper, monotonic_clock=monotonic_clock)
 
 poller.poll_until(condition=lambda: True, timeout_seconds=5, interval_seconds=0.1)
 SystemRetrier(sleeper=sleeper).retry(
