@@ -184,7 +184,7 @@ Use the top-level package for contracts and production helpers, and each feature
 
 | API | Import path | Purpose |
 | --- | --- | --- |
-| [`FixedClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/testing/fixed_clock.py) | `from clock_pattern.clocks.testing import FixedClock` | Test clock that always returns the same datetime and derived date. |
+| [`FixedClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/testing/fixed_clock.py) | `from clock_pattern.clocks.testing import FixedClock` | Test clock that stays fixed until explicitly set or advanced. |
 | [`MockClock`](https://github.com/adriamontoto/clock-pattern/blob/master/clock_pattern/clocks/testing/mock_clock.py) | `from clock_pattern.clocks.testing import MockClock` | Test clock with prepared return values and call assertions. |
 | `MockMonotonicClock` | `from clock_pattern.monotonic_clocks.testing import MockMonotonicClock` | Controllable elapsed-time source with call assertions. |
 | `MockDeadline` | `from clock_pattern.deadlines.testing import MockDeadline` | Controllable deadline with expiry call assertions. |
@@ -291,6 +291,8 @@ assert clock.today() == date(year=2025, month=1, day=7)
 clock.assert_today_method_was_called_once()
 clock.assert_now_method_was_not_called()
 ```
+
+`FixedClock.advance(delta=timedelta(...))` moves time forward explicitly; `set(instant=...)` replaces it, including backward jumps. Both keep `now()` and `today()` consistent.
 
 More testing recipes are available in [`docs/testing/README.md`](docs/testing/README.md).
 

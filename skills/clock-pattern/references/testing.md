@@ -41,6 +41,8 @@ assert clock.now().isoformat() == '2025-01-01T10:30:00+00:00'
 assert clock.today().isoformat() == '2025-01-01'
 ```
 
+`FixedClock.advance(delta=timedelta(...))` advances by a non-negative elapsed duration through UTC and preserves the timezone. `set(instant=...)` replaces the instant and permits backward jumps. Both update `now()` and `today()`. The clock stays fixed between explicit adjustments. See `docs/examples/README.md` for practical recipes.
+
 ## MockClock
 
 Use `MockClock` when the test needs to prove whether code requested `now()` or `today()`.
