@@ -38,7 +38,10 @@ keywords = [
     'domain-driven-design',
 ]
 requires-python = '>=3.11'
-dependencies = ['value-object-pattern>=1.36.0']
+dependencies = [
+    'value-object-pattern>=1.36.0',
+    'typing-extensions>=4.4.0; python_version < "3.12"',
+]
 dynamic = ['version']
 
 [project.urls]
@@ -108,7 +111,7 @@ source = ['clock_pattern']
 [tool.ruff]
 indent-width = 4
 line-length = 120
-target-version = 'py314'
+target-version = 'py311'
 output-format = 'grouped'
 
 [tool.ruff.format]
