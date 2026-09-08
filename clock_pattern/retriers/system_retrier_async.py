@@ -83,6 +83,7 @@ class SystemRetrierAsync(RetrierAsync):
         operation: Callable[[], Awaitable[T]],
         attempts: int,
         delay_seconds: float = 0.0,
+        max_delay_seconds: float | None = None,
         backoff: float = 1.0,
         jitter: bool = False,
         retry_on: type[Exception] | tuple[type[Exception], ...] = Exception,
@@ -95,6 +96,8 @@ class SystemRetrierAsync(RetrierAsync):
             attempts (int): Maximum number of attempts, including the first call.
             delay_seconds (float, optional): Finite, non-negative initial delay between failed attempts. Defaults
             to 0.0 seconds.
+            max_delay_seconds (float | None, optional): Finite, non-negative delay cap applied before jitter. Defaults
+            to `None` (uncapped). Zero disables sleeping. Backoff grows from the capped delay.
             backoff (float, optional): Finite, positive multiplier applied to the delay after each failed attempt.
             Defaults to 1.0 (no backoff).
             jitter (bool, optional): Whether to randomize each delay. Defaults to `False`.
@@ -106,6 +109,8 @@ class SystemRetrierAsync(RetrierAsync):
             ValueError: If the `attempts` is not a positive integer.
             TypeError: If the `delay_seconds` is not an integer or float.
             ValueError: If the `delay_seconds` is negative.
+            ValueError: If `max_delay_seconds` is negative or non-finite.
+            TypeError: If `max_delay_seconds` is neither a number nor `None`.
             TypeError: If the `backoff` is not an integer or float.
             ValueError: If the `backoff` is not positive.
             TypeError: If the `jitter` is not a boolean.
@@ -133,10 +138,14 @@ class SystemRetrierAsync(RetrierAsync):
         """
         PositiveIntegerValueObject(value=attempts, title='AsyncSystemRetrier', parameter='attempts')
         PositiveOrZeroNumberValueObject(value=delay_seconds, title='AsyncSystemRetrier', parameter='delay_seconds')
+        if max_delay_seconds is not None:
+            PositiveOrZeroNumberValueObject(value=max_delay_seconds, title='AsyncSystemRetrier', parameter='max_delay_seconds')  # noqa: E501  # fmt: skip
+
         PositiveNumberValueObject(value=backoff, title='AsyncSystemRetrier', parameter='backoff')
         BooleanValueObject(value=jitter, title='AsyncSystemRetrier', parameter='jitter')
 
-        current_delay_seconds = delay_seconds
+        delay_cap = float('inf') if max_delay_seconds is None else max_delay_seconds
+        current_delay_seconds = min(delay_seconds, delay_cap)
         for attempt_number in range(1, attempts + 1):
             try:
                 return await operation()
@@ -149,6 +158,6 @@ class SystemRetrierAsync(RetrierAsync):
                 if sleep_seconds > 0:
                     await self._sleeper.sleep(seconds=sleep_seconds)
 
-                current_delay_seconds *= backoff
+                current_delay_seconds = min(current_delay_seconds * backoff, delay_cap)
 
         raise RuntimeError('SystemRetrierAsync attempts loop ended unexpectedly.')  # pragma: no cover

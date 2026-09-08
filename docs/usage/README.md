@@ -171,10 +171,17 @@ result = SystemRetrier(sleeper=sleeper).retry(
     operation=lambda: 'done',
     attempts=3,
     delay_seconds=0.2,
+    max_delay_seconds=2,
     backoff=2,
     jitter=True,
 )
 ```
+
+Both retriers accept `max_delay_seconds=None` by default, preserving uncapped delays. A finite non-negative cap
+limits the initial delay and every subsequent backoff delay before full jitter is applied. Backoff grows from the
+capped delay, not the jittered sample. Zero disables sleeping. This limits each sleep, not the total retry duration
+or the execution time of an operation.
+
 
 Async contracts are available as `PollerAsync` and `RetrierAsync`; their production implementations are
 `SystemPollerAsync` and `SystemRetrierAsync`.

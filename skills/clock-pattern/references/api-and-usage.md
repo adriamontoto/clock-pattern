@@ -125,18 +125,14 @@ print(stopwatch.elapsed_seconds)
 
 ## Deadlines
 
-Use `Deadline` as the injectable contract. Create a production timeout with
-`SystemDeadline(seconds=..., monotonic_clock=...)`.
+Use `Deadline` as the injectable contract. Create a production timeout with `SystemDeadline(seconds=..., monotonic_clock=...)`.
 
 - `.elapsed_seconds` and `.remaining_seconds` expose timing state.
 - `.expired` reports whether the timeout has elapsed.
-- `.raise_if_expired()` raises `TimeoutExpiredError` after expiry; `error.elapsed_seconds` contains the measured elapsed
-  duration as a float.
-- `SystemDeadline` context managers interrupt Python code and interruptible system calls with a Unix main-thread
-  `SIGALRM` timer.
+- `.raise_if_expired()` raises `TimeoutExpiredError` after expiry; `error.elapsed_seconds` contains the measured elapsed duration as a float.
+- `SystemDeadline` context managers interrupt Python code and interruptible system calls with a Unix main-thread `SIGALRM` timer.
 - Context use cannot run on Windows or a worker thread, be nested, or replace another `SIGALRM` owner.
-- Long-running C code may delay signal handling; properties and `raise_if_expired()` remain cooperative outside a
-  context.
+- Long-running C code may delay signal handling; properties and `raise_if_expired()` remain cooperative outside a context.
 
 ```python
 from clock_pattern import SystemDeadline, SystemMonotonicClock, TimeoutExpiredError
@@ -160,8 +156,7 @@ Use `PollerAsync` as the async contract and `SystemPollerAsync` as its productio
 
 ## Retrying
 
-Use `Retrier` as the injectable contract and `SystemRetrier` as the production implementation for sync operations that
-should retry on configured exceptions.
+Use `Retrier` as the injectable contract and `SystemRetrier` as the production implementation for sync operations that should retry on configured exceptions.
 
 ```python
 from clock_pattern import SystemMonotonicClock, SystemRetrier, SystemSleeper
@@ -182,6 +177,7 @@ result = SystemRetrier(sleeper=sleeper).retry(
 - `attempts` must be a positive integer.
 - `delay_seconds` defaults to `0.0`.
 - `backoff` defaults to `1.0`; values above `1.0` increase the delay.
+- `max_delay_seconds=None` leaves delays uncapped. A finite non-negative cap bounds the initial and subsequent delays before jitter; backoff grows from the capped delay. Zero disables sleeping. This is not a total execution timeout.
 - `jitter=True` applies full jitter between zero and the current delay.
 - `retry_on` defaults to `Exception` and may be an exception type or non-empty tuple of exception types.
 - Falsey successful return values are returned; only configured exceptions trigger retry.

@@ -213,6 +213,7 @@ SystemRetrier(sleeper=sleeper).retry(
     operation=lambda: 'done',
     attempts=3,
     delay_seconds=0.2,
+    max_delay_seconds=2,
     backoff=2,
     jitter=True,
 )

@@ -76,6 +76,7 @@ class MockRetrier(Retrier):
         operation: Callable[[], T],
         attempts: int,
         delay_seconds: float = 0.0,
+        max_delay_seconds: float | None = None,
         backoff: float = 1.0,
         jitter: bool = False,
         retry_on: type[Exception] | tuple[type[Exception], ...] = Exception,
@@ -88,6 +89,8 @@ class MockRetrier(Retrier):
             attempts (int): Maximum number of attempts, including the first call.
             delay_seconds (float, optional): Finite, non-negative initial delay between failed attempts. Defaults
             to 0.0 seconds.
+            max_delay_seconds (float | None, optional): Finite, non-negative delay cap applied before jitter. Defaults
+            to `None` (uncapped). Zero disables sleeping. Backoff grows from the capped delay.
             backoff (float, optional): Finite, positive multiplier applied to the delay after each failed attempt.
             Defaults to 1.0 (no backoff).
             jitter (bool, optional): Whether to randomize each delay. Defaults to `False`.
@@ -99,6 +102,8 @@ class MockRetrier(Retrier):
             ValueError: If the `attempts` is not a positive integer.
             TypeError: If the `delay_seconds` is not an integer or float.
             ValueError: If the `delay_seconds` is negative.
+            ValueError: If `max_delay_seconds` is negative or non-finite.
+            TypeError: If `max_delay_seconds` is neither a number nor `None`.
             TypeError: If the `backoff` is not an integer or float.
             ValueError: If the `backoff` is not positive.
             TypeError: If the `jitter` is not a boolean.
@@ -122,6 +127,9 @@ class MockRetrier(Retrier):
         """
         PositiveIntegerValueObject(value=attempts, title='MockRetrier', parameter='attempts')
         PositiveOrZeroNumberValueObject(value=delay_seconds, title='MockRetrier', parameter='delay_seconds')
+        if max_delay_seconds is not None:
+            PositiveOrZeroNumberValueObject(value=max_delay_seconds, title='MockRetrier', parameter='max_delay_seconds')
+
         PositiveNumberValueObject(value=backoff, title='MockRetrier', parameter='backoff')
         BooleanValueObject(value=jitter, title='MockRetrier', parameter='jitter')
 
@@ -129,6 +137,7 @@ class MockRetrier(Retrier):
             operation=operation,
             attempts=attempts,
             delay_seconds=delay_seconds,
+            max_delay_seconds=max_delay_seconds,
             backoff=backoff,
             jitter=jitter,
             retry_on=retry_on,
@@ -195,6 +204,7 @@ class MockRetrier(Retrier):
         operation: Callable[[], Any],
         attempts: int,
         delay_seconds: float = 0.0,
+        max_delay_seconds: float | None = None,
         backoff: float = 1.0,
         jitter: bool = False,
         retry_on: type[Exception] | tuple[type[Exception], ...] = Exception,
@@ -206,6 +216,8 @@ class MockRetrier(Retrier):
             operation (Callable[[], Any]): Expected operation callable.
             attempts (int): Expected maximum number of attempts.
             delay_seconds (float, optional): Expected finite, non-negative initial delay. Defaults to 0.0 seconds.
+            max_delay_seconds (float | None, optional): Finite, non-negative delay cap applied before jitter. Defaults
+            to `None` (uncapped). Zero disables sleeping. Backoff grows from the capped delay.
             backoff (float, optional): Expected finite, positive delay multiplier. Defaults to 1.0.
             jitter (bool, optional): Expected jitter flag. Defaults to False.
             retry_on (type[Exception] | tuple[type[Exception], ...], optional): Expected retryable exception types.
@@ -216,6 +228,8 @@ class MockRetrier(Retrier):
             ValueError: If the `attempts` is not a positive integer.
             TypeError: If the `delay_seconds` is not an integer or float.
             ValueError: If the `delay_seconds` is negative.
+            ValueError: If `max_delay_seconds` is negative or non-finite.
+            TypeError: If `max_delay_seconds` is neither a number nor `None`.
             TypeError: If the `backoff` is not an integer or float.
             ValueError: If the `backoff` is not positive.
             TypeError: If the `jitter` is not a boolean.
@@ -233,6 +247,9 @@ class MockRetrier(Retrier):
         """
         PositiveIntegerValueObject(value=attempts, title='MockRetrier', parameter='attempts')
         PositiveOrZeroNumberValueObject(value=delay_seconds, title='MockRetrier', parameter='delay_seconds')
+        if max_delay_seconds is not None:
+            PositiveOrZeroNumberValueObject(value=max_delay_seconds, title='MockRetrier', parameter='max_delay_seconds')
+
         PositiveNumberValueObject(value=backoff, title='MockRetrier', parameter='backoff')
         BooleanValueObject(value=jitter, title='MockRetrier', parameter='jitter')
 
@@ -240,6 +257,7 @@ class MockRetrier(Retrier):
             operation=operation,
             attempts=attempts,
             delay_seconds=delay_seconds,
+            max_delay_seconds=max_delay_seconds,
             backoff=backoff,
             jitter=jitter,
             retry_on=retry_on,

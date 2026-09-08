@@ -558,3 +558,296 @@ async def test_system_retrier_async_retry_on_tuple_value() -> None:
     )
 
     assert result == 'done'
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_retrier_async_caps_backoff_at_max_delay_seconds() -> None:
+    """
+    Test SystemRetrierAsync caps increasing backoff at the maximum delay.
+    """
+    sleeper = MockSleeperAsync(monotonic_clock=MockMonotonicClock())
+
+    async def operation() -> None:
+        raise ConnectionError('offline')
+
+    with assert_raises(
+        expected_exception=ConnectionError,
+        match='^offline$',
+    ):
+        await SystemRetrierAsync(sleeper=sleeper).retry(
+            operation=operation,
+            attempts=5,
+            delay_seconds=1.0,
+            max_delay_seconds=3.0,
+            backoff=2.0,
+            retry_on=ConnectionError,
+        )
+
+    assert sleeper.sleep_calls == (1.0, 2.0, 3.0, 3.0)
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_retrier_async_caps_initial_delay_at_max_delay_seconds() -> None:
+    """
+    Test SystemRetrierAsync caps an initial delay above the maximum.
+    """
+    sleeper = MockSleeperAsync(monotonic_clock=MockMonotonicClock())
+
+    async def operation() -> None:
+        raise ConnectionError('offline')
+
+    with assert_raises(
+        expected_exception=ConnectionError,
+        match='^offline$',
+    ):
+        await SystemRetrierAsync(sleeper=sleeper).retry(
+            operation=operation,
+            attempts=5,
+            delay_seconds=5.0,
+            max_delay_seconds=2.0,
+            backoff=2.0,
+            retry_on=ConnectionError,
+        )
+
+    assert sleeper.sleep_calls == (2.0, 2.0, 2.0, 2.0)
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_retrier_async_max_delay_seconds_zero_value() -> None:
+    """
+    Test SystemRetrierAsync does not sleep when the maximum delay is zero.
+    """
+    sleeper = MockSleeperAsync(monotonic_clock=MockMonotonicClock())
+
+    async def operation() -> None:
+        raise ConnectionError('offline')
+
+    with assert_raises(
+        expected_exception=ConnectionError,
+        match='^offline$',
+    ):
+        await SystemRetrierAsync(sleeper=sleeper).retry(
+            operation=operation,
+            attempts=5,
+            delay_seconds=1.0,
+            max_delay_seconds=0.0,
+            backoff=2.0,
+            retry_on=ConnectionError,
+        )
+
+    assert sleeper.sleep_calls == ()
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_retrier_async_decreases_backoff_from_capped_delay() -> None:
+    """
+    Test SystemRetrierAsync decreases backoff from the capped initial delay.
+    """
+    sleeper = MockSleeperAsync(monotonic_clock=MockMonotonicClock())
+
+    async def operation() -> None:
+        raise ConnectionError('offline')
+
+    with assert_raises(
+        expected_exception=ConnectionError,
+        match='^offline$',
+    ):
+        await SystemRetrierAsync(sleeper=sleeper).retry(
+            operation=operation,
+            attempts=5,
+            delay_seconds=4.0,
+            max_delay_seconds=2.0,
+            backoff=0.5,
+            retry_on=ConnectionError,
+        )
+
+    assert sleeper.sleep_calls == (2.0, 1.0, 0.5, 0.25)
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_retrier_async_caps_overflowing_backoff() -> None:
+    """
+    Test SystemRetrierAsync caps backoff even when multiplication overflows.
+    """
+    sleeper = MockSleeperAsync(monotonic_clock=MockMonotonicClock())
+
+    async def operation() -> None:
+        raise ConnectionError('offline')
+
+    with assert_raises(
+        expected_exception=ConnectionError,
+        match='^offline$',
+    ):
+        await SystemRetrierAsync(sleeper=sleeper).retry(
+            operation=operation,
+            attempts=5,
+            delay_seconds=1.0,
+            max_delay_seconds=3.0,
+            backoff=1e308,
+            retry_on=ConnectionError,
+        )
+
+    assert sleeper.sleep_calls == (1.0, 3.0, 3.0, 3.0)
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_retrier_async_caps_before_jitter() -> None:
+    """
+    Test SystemRetrierAsync jitter receives capped bounds and does not change the following backoff calculation.
+    """
+    sleeper = MockSleeperAsync(monotonic_clock=MockMonotonicClock())
+    bounds: list[tuple[float, float]] = []
+
+    def random_uniform(low: float, high: float) -> float:
+        bounds.append((low, high))
+        return high / 2
+
+    async def operation() -> None:
+        raise ConnectionError('offline')
+
+    with assert_raises(
+        expected_exception=ConnectionError,
+        match='^offline$',
+    ):
+        await SystemRetrierAsync(sleeper=sleeper, random_uniform=random_uniform).retry(
+            operation=operation,
+            attempts=4,
+            delay_seconds=2,
+            max_delay_seconds=3,
+            backoff=2,
+            jitter=True,
+        )
+    assert bounds == [(0.0, 2), (0.0, 3), (0.0, 3)]
+    assert sleeper.sleep_calls == (1.0, 1.5, 1.5)
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_retrier_async_max_delay_seconds_invalid_type() -> None:
+    """
+    Test SystemRetrierAsync rejects invalid type before invoking the operation.
+    """
+    max_delay_seconds = FloatMother.invalid_type()
+
+    async def operation() -> None:
+        raise AssertionError('operation must not run')
+
+    with assert_raises(
+        expected_exception=TypeError,
+        match=escape(f'AsyncSystemRetrier max_delay_seconds <<<{max_delay_seconds}>>> must be an integer or float. Got <<<{type(max_delay_seconds).__name__}>>> type.'),  # noqa: E501
+    ):  # fmt: skip
+        await SystemRetrierAsync(sleeper=MockSleeperAsync(monotonic_clock=MockMonotonicClock())).retry(
+            operation=operation,
+            attempts=1,
+            max_delay_seconds=max_delay_seconds,
+        )
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_retrier_async_max_delay_seconds_negative_random_value() -> None:
+    """
+    Test SystemRetrierAsync rejects negative random value before invoking the operation.
+    """
+    max_delay_seconds = FloatMother.negative()
+
+    async def operation() -> None:
+        raise AssertionError('operation must not run')
+
+    with assert_raises(
+        expected_exception=ValueError,
+        match=escape(f'AsyncSystemRetrier max_delay_seconds <<<{max_delay_seconds}>>> must be greater than or equal to zero.'),  # noqa: E501
+    ):  # fmt: skip
+        await SystemRetrierAsync(sleeper=MockSleeperAsync(monotonic_clock=MockMonotonicClock())).retry(
+            operation=operation,
+            attempts=1,
+            max_delay_seconds=max_delay_seconds,
+        )
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_retrier_async_max_delay_seconds_positive_infinity_value() -> None:
+    """
+    Test SystemRetrierAsync rejects positive infinity before invoking the operation.
+    """
+    max_delay_seconds = inf
+
+    async def operation() -> None:
+        raise AssertionError('operation must not run')
+
+    with assert_raises(
+        expected_exception=ValueError,
+        match=escape(f'AsyncSystemRetrier max_delay_seconds <<<{max_delay_seconds}>>> must be finite and representable as a float.'),  # noqa: E501
+    ):  # fmt: skip
+        await SystemRetrierAsync(sleeper=MockSleeperAsync(monotonic_clock=MockMonotonicClock())).retry(
+            operation=operation,
+            attempts=1,
+            max_delay_seconds=max_delay_seconds,
+        )
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_retrier_async_max_delay_seconds_negative_infinity_value() -> None:
+    """
+    Test SystemRetrierAsync rejects negative infinity before invoking the operation.
+    """
+    max_delay_seconds = -inf
+
+    async def operation() -> None:
+        raise AssertionError('operation must not run')
+
+    with assert_raises(
+        expected_exception=ValueError,
+        match=escape(f'AsyncSystemRetrier max_delay_seconds <<<{max_delay_seconds}>>> must be finite and representable as a float.'),    # noqa: E501
+    ):  # fmt: skip
+        await SystemRetrierAsync(sleeper=MockSleeperAsync(monotonic_clock=MockMonotonicClock())).retry(
+            operation=operation,
+            attempts=1,
+            max_delay_seconds=max_delay_seconds,
+        )
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_retrier_async_max_delay_seconds_nan_value() -> None:
+    """
+    Test SystemRetrierAsync rejects nan before invoking the operation.
+    """
+    max_delay_seconds = nan
+
+    async def operation() -> None:
+        raise AssertionError('operation must not run')
+
+    with assert_raises(
+        expected_exception=ValueError,
+        match=escape(f'AsyncSystemRetrier max_delay_seconds <<<{max_delay_seconds}>>> must be finite and representable as a float.'),  # noqa: E501
+    ):  # fmt: skip
+        await SystemRetrierAsync(sleeper=MockSleeperAsync(monotonic_clock=MockMonotonicClock())).retry(
+            operation=operation,
+            attempts=1,
+            max_delay_seconds=max_delay_seconds,
+        )
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_retrier_async_max_delay_seconds_positive_random_value() -> None:
+    """
+    Test SystemRetrierAsync accepts a generated positive delay cap.
+    """
+    max_delay_seconds = FloatMother.positive()
+
+    async def operation() -> str:
+        return 'done'
+
+    retrier = SystemRetrierAsync(sleeper=MockSleeperAsync(monotonic_clock=MockMonotonicClock()))
+
+    assert await retrier.retry(operation=operation, attempts=1, max_delay_seconds=max_delay_seconds) == 'done'

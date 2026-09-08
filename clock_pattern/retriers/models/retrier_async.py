@@ -45,6 +45,7 @@ class RetrierAsync(ABC):
         operation: Callable[[], Awaitable[T]],
         attempts: int,
         delay_seconds: float = 0.0,
+        max_delay_seconds: float | None = None,
         backoff: float = 1.0,
         jitter: bool = False,
         retry_on: type[Exception] | tuple[type[Exception], ...] = Exception,
@@ -57,6 +58,8 @@ class RetrierAsync(ABC):
             attempts (int): Maximum number of attempts, including the first call.
             delay_seconds (float, optional): Finite, non-negative initial delay between failed attempts. Defaults
             to 0.0 seconds.
+            max_delay_seconds (float | None, optional): Finite, non-negative delay cap applied before jitter. Defaults
+            to `None` (uncapped). Zero disables sleeping. Backoff grows from the capped delay.
             backoff (float, optional): Finite, positive multiplier applied to the delay after each failed attempt.
             Defaults to 1.0 (no backoff).
             jitter (bool, optional): Whether to randomize each delay. Defaults to `False`.

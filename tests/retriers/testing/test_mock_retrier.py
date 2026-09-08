@@ -435,3 +435,71 @@ def test_mock_retrier_assert_retry_method_jitter_invalid_type() -> None:
             attempts=1,
             jitter=jitter,
         )
+
+
+@mark.unit_testing
+def test_mock_retrier_records_delay_cap() -> None:
+    """
+    Test MockRetrier records and asserts the cap alongside the other retry arguments.
+    """
+
+    def operation() -> str:
+        return 'ignored'
+
+    retrier = MockRetrier()
+    retrier.prepare_retry_method_return_value(value='done')
+
+    assert retrier.retry(operation=operation, attempts=3, max_delay_seconds=2) == 'done'
+    retrier.assert_retry_method_was_called_once_with(operation=operation, attempts=3, max_delay_seconds=2)
+
+    with assert_raises(
+        expected_exception=AssertionError,
+        match=escape(f"expected call not found.\nExpected: mock(operation={operation!r}, attempts=3, delay_seconds=0.0, max_delay_seconds=1, backoff=1.0, jitter=False, retry_on=<class 'Exception'>)\n  Actual: mock(operation={operation!r}, attempts=3, delay_seconds=0.0, max_delay_seconds=2, backoff=1.0, jitter=False, retry_on=<class 'Exception'>)"),  # noqa: E501
+    ):  # fmt: skip
+        retrier.assert_retry_method_was_called_once_with(operation=operation, attempts=3, max_delay_seconds=1)
+
+
+@mark.unit_testing
+def test_mock_retrier_retry_method_max_delay_seconds_negative_random_value() -> None:
+    """
+    Test MockRetrier retry method rejects a generated negative delay cap.
+    """
+    max_delay_seconds = FloatMother.negative()
+
+    def operation() -> None:
+        return None
+
+    retrier = MockRetrier()
+
+    with assert_raises(
+        expected_exception=ValueError,
+        match=escape(f'MockRetrier max_delay_seconds <<<{max_delay_seconds}>>> must be greater than or equal to zero.'),
+    ):
+        retrier.retry(operation=operation, attempts=1, max_delay_seconds=max_delay_seconds)
+
+    retrier.assert_retry_method_was_not_called()
+
+
+@mark.unit_testing
+def test_mock_retrier_assert_retry_method_max_delay_seconds_negative_random_value() -> None:
+    """
+    Test MockRetrier assert_retry_method_was_called_once_with method rejects a generated negative delay cap.
+    """
+    max_delay_seconds = FloatMother.negative()
+
+    def operation() -> None:
+        return None
+
+    retrier = MockRetrier()
+
+    with assert_raises(
+        expected_exception=ValueError,
+        match=escape(f'MockRetrier max_delay_seconds <<<{max_delay_seconds}>>> must be greater than or equal to zero.'),
+    ):
+        retrier.assert_retry_method_was_called_once_with(
+            operation=operation,
+            attempts=1,
+            max_delay_seconds=max_delay_seconds,
+        )
+
+    retrier.assert_retry_method_was_not_called()
