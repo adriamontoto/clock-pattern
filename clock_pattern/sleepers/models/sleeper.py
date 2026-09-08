@@ -16,7 +16,7 @@ class Sleeper(ABC):
     from clock_pattern.monotonic_clocks import SystemMonotonicClock
 
     sleeper = SystemSleeper(monotonic_clock=SystemMonotonicClock())
-    sleeper.sleep(seconds=1)
+    sleeper.sleep(seconds=0.001)
     ```
     """
 
@@ -34,7 +34,7 @@ class Sleeper(ABC):
         from clock_pattern.monotonic_clocks import SystemMonotonicClock
 
         sleeper = SystemSleeper(monotonic_clock=SystemMonotonicClock())
-        sleeper.sleep(seconds=1)
+        sleeper.sleep(seconds=0.001)
         ```
         """
 
@@ -56,7 +56,7 @@ class Sleeper(ABC):
 
         sleeper = SystemSleeper(monotonic_clock=SystemMonotonicClock())
 
-        with sleeper.minimum_duration(seconds=1):
+        with sleeper.minimum_duration(seconds=0.001):
             pass
         ```
         """

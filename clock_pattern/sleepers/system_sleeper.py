@@ -29,7 +29,7 @@ class SystemSleeper(Sleeper):
     from clock_pattern.monotonic_clocks import SystemMonotonicClock
 
     sleeper = SystemSleeper(monotonic_clock=SystemMonotonicClock())
-    sleeper.sleep(seconds=1)
+    sleeper.sleep(seconds=0.001)
     ```
     """
 
@@ -48,7 +48,7 @@ class SystemSleeper(Sleeper):
         from clock_pattern.monotonic_clocks import SystemMonotonicClock
 
         sleeper = SystemSleeper(monotonic_clock=SystemMonotonicClock())
-        sleeper.sleep(seconds=1)
+        sleeper.sleep(seconds=0.001)
         ```
         """
         self._monotonic_clock = monotonic_clock
@@ -71,7 +71,7 @@ class SystemSleeper(Sleeper):
         from clock_pattern.monotonic_clocks import SystemMonotonicClock
 
         sleeper = SystemSleeper(monotonic_clock=SystemMonotonicClock())
-        sleeper.sleep(seconds=1)
+        sleeper.sleep(seconds=0.001)
         ```
         """
         PositiveOrZeroNumberValueObject(value=seconds, title='SystemSleeper', parameter='seconds')
@@ -102,7 +102,7 @@ class SystemSleeper(Sleeper):
 
         sleeper = SystemSleeper(monotonic_clock=SystemMonotonicClock())
 
-        with sleeper.minimum_duration(seconds=1):
+        with sleeper.minimum_duration(seconds=0.001):
             pass
         ```
         """

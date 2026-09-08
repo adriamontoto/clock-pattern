@@ -101,6 +101,5 @@ class Deadline(AbstractContextManager['Deadline']):
         monotonic_clock = MockMonotonicClock()
         deadline = SystemDeadline(seconds=1, monotonic_clock=monotonic_clock)
         monotonic_clock.advance(seconds=1)
-        deadline.raise_if_expired()
         ```
         """

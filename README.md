@@ -202,7 +202,7 @@ poller = SystemPoller(sleeper=sleeper, monotonic_clock=monotonic_clock)
 with Stopwatch(monotonic_clock=monotonic_clock) as stopwatch:
     pass
 
-with sleeper.minimum_duration(seconds=2):
+with sleeper.minimum_duration(seconds=0.001):
     pass
 
 with SystemDeadline(seconds=5, monotonic_clock=monotonic_clock):

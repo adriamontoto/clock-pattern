@@ -29,7 +29,7 @@ class SystemSleeperAsync(SleeperAsync):
     from clock_pattern.monotonic_clocks import SystemMonotonicClock
 
     sleeper = SystemSleeperAsync(monotonic_clock=SystemMonotonicClock())
-    await sleeper.sleep(seconds=1)
+    await sleeper.sleep(seconds=0.001)
     ```
     """
 
@@ -48,7 +48,7 @@ class SystemSleeperAsync(SleeperAsync):
         from clock_pattern.monotonic_clocks import SystemMonotonicClock
 
         sleeper = SystemSleeperAsync(monotonic_clock=SystemMonotonicClock())
-        await sleeper.sleep(seconds=1)
+        await sleeper.sleep(seconds=0.001)
         ```
         """
         self._monotonic_clock = monotonic_clock
@@ -71,7 +71,7 @@ class SystemSleeperAsync(SleeperAsync):
         from clock_pattern.monotonic_clocks import SystemMonotonicClock
 
         sleeper = SystemSleeperAsync(monotonic_clock=SystemMonotonicClock())
-        await sleeper.sleep(seconds=1)
+        await sleeper.sleep(seconds=0.001)
         ```
         """
         PositiveOrZeroNumberValueObject(value=seconds, title='SystemSleeperAsync', parameter='seconds')
@@ -105,7 +105,7 @@ class SystemSleeperAsync(SleeperAsync):
 
         sleeper = SystemSleeperAsync(monotonic_clock=SystemMonotonicClock())
 
-        async with sleeper.minimum_duration(seconds=1):
+        async with sleeper.minimum_duration(seconds=0.001):
             pass
         ```
         """

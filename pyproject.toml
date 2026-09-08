@@ -61,6 +61,7 @@ test = [
     'pytest>=8.0.0',
     'pytest-asyncio>=1.3.0',
     'pytest-randomly>=3.0.0',
+    'sybil[pytest]>=10.1.0',
     'object-mother-pattern>=2.1.0',
     { include-group = 'coverage' },
 ]
@@ -75,9 +76,10 @@ all = [
 [tool.pytest.ini_options]
 pythonpath = '.'
 addopts = [
-    '--strict-config',  # fail if an unregistered option is used
-    '--strict-markers', # fail if an unregistered marker is used
-    '--color=yes',      # color the output
+    '--strict-config',          # fail if an unregistered option is used
+    '--strict-markers',         # fail if an unregistered marker is used
+    '--color=yes',              # color the output
+    '-p tests.test_docstrings',
 ]
 markers = ['unit_testing: Check a unique functionality']
 xfail_strict = true

@@ -16,7 +16,7 @@ class SleeperAsync(ABC):
     from clock_pattern.monotonic_clocks import SystemMonotonicClock
 
     sleeper = SystemSleeperAsync(monotonic_clock=SystemMonotonicClock())
-    await sleeper.sleep(seconds=1)
+    await sleeper.sleep(seconds=0.001)
     ```
     """
 
@@ -34,7 +34,7 @@ class SleeperAsync(ABC):
         from clock_pattern.monotonic_clocks import SystemMonotonicClock
 
         sleeper = SystemSleeperAsync(monotonic_clock=SystemMonotonicClock())
-        await sleeper.sleep(seconds=0.1)
+        await sleeper.sleep(seconds=0.001)
         ```
         """
 
@@ -58,7 +58,7 @@ class SleeperAsync(ABC):
 
         sleeper = SystemSleeperAsync(monotonic_clock=SystemMonotonicClock())
 
-        async with sleeper.minimum_duration(seconds=1):
+        async with sleeper.minimum_duration(seconds=0.001):
             pass
         ```
         """

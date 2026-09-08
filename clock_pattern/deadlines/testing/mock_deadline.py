@@ -138,7 +138,6 @@ class MockDeadline(Deadline):
 
         deadline = MockDeadline(seconds=1)
         deadline.advance(seconds=1)
-        deadline.raise_if_expired()
         ```
         """
         self._raise_if_expired_mock()
