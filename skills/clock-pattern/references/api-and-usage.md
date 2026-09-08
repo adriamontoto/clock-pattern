@@ -131,7 +131,7 @@ Use `Deadline` as the injectable contract. Create a production timeout with `Sys
 - Context use cannot run on Windows or a worker thread, be nested, or replace another `SIGALRM` owner.
 - Long-running C code may delay signal handling; properties and `raise_if_expired()` remain cooperative outside a context.
 
-```python
+```python unix
 from clock_pattern import SystemDeadline, SystemMonotonicClock, TimeoutExpiredError
 
 try:

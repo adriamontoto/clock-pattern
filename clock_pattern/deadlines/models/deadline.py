@@ -11,7 +11,7 @@ class Deadline(AbstractContextManager['Deadline']):
     Define the interface for injectable deadlines.
 
     Example:
-    ```python
+    ```python unix
     from clock_pattern import SystemDeadline, SystemMonotonicClock
 
     with SystemDeadline(seconds=1, monotonic_clock=SystemMonotonicClock()) as deadline:

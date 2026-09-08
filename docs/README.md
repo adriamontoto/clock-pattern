@@ -9,6 +9,7 @@ Use this page as the documentation hub:
 | --- | --- |
 | [Usage Guide](usage/README.md) | How to inject clocks, sleepers, deadlines, pollers, and retriers. |
 | [Timezone Guide](timezones/README.md) | UTC defaults, `SystemClock` timezone configuration, and date-boundary guidance. |
+| [Practical Examples](examples/README.md) | Token expiration, cache TTL, job polling, and capped retries. |
 | [Testing Guide](testing/README.md) | How to use clock and elapsed-time test doubles for deterministic tests. |
 
 ## Wall-Clock API
