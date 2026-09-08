@@ -100,6 +100,30 @@ def test_system_poller_poll_until_method_caps_sleep_to_remaining_seconds_after_c
 
 
 @mark.unit_testing
+def test_system_poller_poll_until_method_rejects_success_after_timeout() -> None:
+    """
+    Test a slow successful condition cannot bypass the timeout.
+    """
+    monotonic_clock = MockMonotonicClock()
+    sleeper = MockSleeper(monotonic_clock=monotonic_clock)
+
+    def condition() -> bool:
+        monotonic_clock.advance(seconds=2)
+        return True
+
+    with assert_raises(
+        expected_exception=TimeoutExpiredError,
+        match=escape('Deadline expired after <<<2.0>>> seconds.'),
+    ):
+        SystemPoller(sleeper=sleeper, monotonic_clock=monotonic_clock).poll_until(
+            condition=condition,
+            timeout_seconds=1,
+        )
+
+    sleeper.assert_sleep_method_was_not_called()
+
+
+@mark.unit_testing
 def test_system_poller_poll_until_method_accepts_true_condition_at_zero_timeout() -> None:
     """
     Test SystemPoller lets an immediately true condition win at a zero timeout.

@@ -125,6 +125,35 @@ async def test_system_poller_async_poll_until_method_caps_sleep_after_awaitable_
 
 @mark.unit_testing
 @mark.asyncio
+@mark.parametrize('asynchronous', (False, True))
+async def test_system_poller_async_poll_until_method_rejects_success_after_timeout(*, asynchronous: bool) -> None:
+    """
+    Test a slow sync or async successful condition cannot bypass the timeout.
+    """
+    monotonic_clock = MockMonotonicClock()
+    sleeper = MockSleeperAsync(monotonic_clock=monotonic_clock)
+
+    def condition() -> bool:
+        monotonic_clock.advance(seconds=2)
+        return True
+
+    async def condition_async() -> bool:
+        return condition()
+
+    with assert_raises(
+        expected_exception=TimeoutExpiredError,
+        match=escape('Deadline expired after <<<2.0>>> seconds.'),
+    ):
+        await SystemPollerAsync(sleeper=sleeper, monotonic_clock=monotonic_clock).poll_until(
+            condition=condition_async if asynchronous else condition,
+            timeout_seconds=1,
+        )
+
+    sleeper.assert_sleep_method_was_not_called()
+
+
+@mark.unit_testing
+@mark.asyncio
 async def test_system_poller_async_poll_until_method_accepts_true_condition_at_zero_timeout() -> None:
     """
     Test SystemPollerAsync lets an immediately true condition win at a zero timeout.

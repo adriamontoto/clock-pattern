@@ -2,6 +2,7 @@
 Test SystemSleeperAsync sleeper.
 """
 
+from asyncio import CancelledError, Event, create_task
 from unittest.mock import patch
 
 from object_mother_pattern import FloatMother
@@ -96,6 +97,31 @@ async def test_system_sleeper_async_sleep_method_seconds_positive_random_value()
         await sleeper.sleep(seconds=seconds)
 
     sleep_mock.assert_awaited_once_with(seconds)
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_sleeper_async_minimum_duration_method_does_not_pad_cancellation() -> None:
+    """
+    Test task cancellation propagates without awaiting the remaining duration.
+    """
+    sleeper = SystemSleeperAsync(monotonic_clock=MockMonotonicClock())
+    entered = Event()
+
+    async def work() -> None:
+        async with sleeper.minimum_duration(seconds=60):
+            entered.set()
+            await Event().wait()
+
+    with patch('clock_pattern.sleepers.system_sleeper_async.sleep') as sleep_mock:
+        task = create_task(work())
+        await entered.wait()
+        task.cancel('operation cancelled')
+
+        with assert_raises(expected_exception=CancelledError, match='operation cancelled'):
+            await task
+
+    sleep_mock.assert_not_awaited()
 
 
 @mark.unit_testing

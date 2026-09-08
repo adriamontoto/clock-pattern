@@ -41,6 +41,9 @@ class Poller(ABC):
         """
         Poll a condition until it succeeds or the timeout expires.
 
+        Timeout checks are cooperative: conditions are not interrupted. Success at the boundary is accepted;
+        success after a positive timeout is rejected. A zero timeout evaluates the condition once.
+
         Args:
             condition (Callable[[], bool]): Condition checked until it returns `True`.
             timeout_seconds (float): Maximum duration to wait.

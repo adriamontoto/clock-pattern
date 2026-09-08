@@ -70,6 +70,10 @@ class SystemPollerAsync(PollerAsync):
         """
         Poll `condition` until it returns or awaits to `True`.
 
+        Conditions run cooperatively and are not interrupted. A successful result at the timeout boundary is
+        accepted, but a result after a positive timeout raises. A zero timeout evaluates the condition once.
+        Use an outer `asyncio.timeout()` when the condition itself must be cancelled after a time limit.
+
         Args:
             condition (Callable[[], bool | Awaitable[bool]]): Sync or async condition checked until it is true.
             timeout_seconds (float): Maximum duration to wait.
@@ -107,6 +111,9 @@ class SystemPollerAsync(PollerAsync):
                 condition_result = await condition_result
 
             condition_result = BooleanValueObject(value=condition_result, title='SystemPollerAsync', parameter='condition').value  # noqa: E501  # fmt: skip
+            if timeout_seconds > 0 and deadline.elapsed_seconds > timeout_seconds:
+                deadline.raise_if_expired()
+
             if condition_result:
                 return
 

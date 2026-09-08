@@ -69,6 +69,9 @@ class SystemPoller(Poller):
         """
         Poll `condition` until it returns `True`.
 
+        Conditions run cooperatively and are not interrupted. A successful result at the timeout boundary is
+        accepted, but a result after a positive timeout raises. A zero timeout evaluates the condition once.
+
         Args:
             condition (Callable[[], bool]): Condition checked until it returns `True`.
             timeout_seconds (float): Maximum duration to wait.
@@ -101,6 +104,9 @@ class SystemPoller(Poller):
         deadline = SystemDeadline(seconds=timeout_seconds, monotonic_clock=self._monotonic_clock)
         while True:
             condition_result = BooleanValueObject(value=condition(), title='SystemPoller', parameter='condition').value
+            if timeout_seconds > 0 and deadline.elapsed_seconds > timeout_seconds:
+                deadline.raise_if_expired()
+
             if condition_result:
                 return
 

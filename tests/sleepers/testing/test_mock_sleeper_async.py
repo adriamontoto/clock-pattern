@@ -2,6 +2,8 @@
 Test MockSleeperAsync sleeper.
 """
 
+from asyncio import CancelledError, Event, create_task
+
 from object_mother_pattern import FloatMother
 from pytest import mark, raises as assert_raises
 
@@ -114,6 +116,32 @@ async def test_mock_sleeper_async_sleep_method_seconds_positive_random_value() -
     assert sleeper.sleep_calls == (seconds,)
     assert monotonic_clock.current_seconds() == seconds
     sleeper.assert_sleep_method_was_called_once_with(seconds=seconds)
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_mock_sleeper_async_minimum_duration_method_does_not_pad_cancellation() -> None:
+    """
+    Test task cancellation neither records sleep nor advances the mock clock.
+    """
+    monotonic_clock = MockMonotonicClock()
+    sleeper = MockSleeperAsync(monotonic_clock=monotonic_clock)
+    entered = Event()
+
+    async def work() -> None:
+        async with sleeper.minimum_duration(seconds=60):
+            entered.set()
+            await Event().wait()
+
+    task = create_task(work())
+    await entered.wait()
+    task.cancel('operation cancelled')
+
+    with assert_raises(expected_exception=CancelledError, match='operation cancelled'):
+        await task
+
+    sleeper.assert_sleep_method_was_not_called()
+    assert monotonic_clock.current_seconds() == 0.0
 
 
 @mark.unit_testing
