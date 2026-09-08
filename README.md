@@ -75,6 +75,7 @@ The root README is the entry point. Deeper guides live in this repository and ar
 - [`docs/README.md`](docs/README.md): Documentation hub.
 - [`docs/usage/README.md`](docs/usage/README.md): Core usage patterns and service composition.
 - [`docs/timezones/README.md`](docs/timezones/README.md): Timezone behavior, UTC defaults, and date-boundary guidance.
+- [`docs/examples/README.md`](docs/examples/README.md): Token expiration, cache TTL, polling, and retry recipes.
 - [`docs/testing/README.md`](docs/testing/README.md): `FixedClock`, `MockClock`, and deterministic test patterns.
 
 

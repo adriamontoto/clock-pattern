@@ -186,6 +186,7 @@ limits the initial delay and every subsequent backoff delay before full jitter i
 capped delay, not the jittered sample. Zero disables sleeping. This limits each sleep, not the total retry duration
 or the execution time of an operation.
 
+See [practical examples](../examples/README.md) for complete scenarios using real helpers with fake time.
 
 Async contracts are available as `PollerAsync` and `RetrierAsync`; their production implementations are
 `SystemPollerAsync` and `SystemRetrierAsync`.
