@@ -43,6 +43,8 @@ class SleeperAsync(ABC):
         """
         Create an async context manager that ensures the enclosed work takes at least `seconds`.
 
+        Cancellation propagates without padding the duration. Other body errors still pad the duration.
+
         Args:
             seconds (float): The minimum duration the enclosed work should take.
 

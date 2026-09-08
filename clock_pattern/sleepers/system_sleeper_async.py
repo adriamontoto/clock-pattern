@@ -9,7 +9,7 @@ if version_info >= (3, 12):
 else:
     from typing_extensions import override  # pragma: no cover
 
-from asyncio import sleep
+from asyncio import CancelledError, sleep
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -84,6 +84,9 @@ class SystemSleeperAsync(SleeperAsync):
         """
         Create an async context manager that ensures the enclosed work takes at least `seconds`.
 
+        Cancellation propagates immediately without padding the duration. Other body errors still wait out
+        the remaining duration before propagating.
+
         Args:
             seconds (float): The minimum elapsed duration for the enclosed asynchronous work.
 
@@ -109,12 +112,16 @@ class SystemSleeperAsync(SleeperAsync):
         PositiveOrZeroNumberValueObject(value=seconds, title='SystemSleeperAsync', parameter='seconds')
 
         started_time = self._monotonic_clock.current_seconds()
+        cancelled = False
         try:
             yield
 
+        except CancelledError:
+            cancelled = True
+            raise
+
         finally:
-            elapsed_seconds = self._monotonic_clock.current_seconds() - started_time
-            remaining_seconds = seconds - elapsed_seconds
+            remaining_seconds = 0.0 if cancelled else seconds - (self._monotonic_clock.current_seconds() - started_time)
 
             if remaining_seconds > 0:
                 await self.sleep(seconds=remaining_seconds)

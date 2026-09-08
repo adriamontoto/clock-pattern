@@ -9,6 +9,7 @@ if version_info >= (3, 12):
 else:
     from typing_extensions import override  # pragma: no cover
 
+from asyncio import CancelledError
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock
@@ -138,6 +139,8 @@ class MockSleeperAsync(SleeperAsync):
         """
         Create an async context manager that ensures the enclosed work takes at least `seconds`.
 
+        Cancellation propagates without recording sleep or advancing time. Other body errors still pad the duration.
+
         Args:
             seconds (float): The minimum elapsed duration for the enclosed asynchronous work.
 
@@ -162,12 +165,16 @@ class MockSleeperAsync(SleeperAsync):
         PositiveOrZeroNumberValueObject(value=seconds, title='MockSleeperAsync', parameter='seconds')
 
         started_time = self._monotonic_clock.current_seconds()
+        cancelled = False
         try:
             yield
 
+        except CancelledError:
+            cancelled = True
+            raise
+
         finally:
-            elapsed_seconds = self._monotonic_clock.current_seconds() - started_time
-            remaining_seconds = seconds - elapsed_seconds
+            remaining_seconds = 0.0 if cancelled else seconds - (self._monotonic_clock.current_seconds() - started_time)
 
             if remaining_seconds > 0:
                 await self.sleep(seconds=remaining_seconds)

@@ -1,7 +1,6 @@
 # Usage Guide
 
-Clock Pattern is intentionally small. It gives application code a stable contract for asking "what time is it?" without
-coupling that code to the operating system clock.
+Clock Pattern is intentionally small. It gives application code a stable contract for asking "what time is it?" without coupling that code to the operating system clock.
 
 ## Depend On `Clock`
 
@@ -72,8 +71,7 @@ clock = UtcClock()
 is_first_day = clock.today().day == 1
 ```
 
-Avoid deriving a date in service code from a different timezone than the clock used by the application. `today()` already
-uses the configured clock timezone.
+Avoid deriving a date in service code from a different timezone than the clock used by the application. `today()` already uses the configured clock timezone.
 
 ## Custom Clocks
 
@@ -96,8 +94,7 @@ class LogicalClock(Clock):
         return self._instant.date()
 ```
 
-Custom clocks are useful for simulations, event replay, deterministic workflows, or infrastructure that owns a logical
-time source.
+Custom clocks are useful for simulations, event replay, deterministic workflows, or infrastructure that owns a logical time source.
 
 ## Use Sleepers And Minimum Duration
 
@@ -120,11 +117,11 @@ use_case = UseCase(sleeper=SystemSleeper(monotonic_clock=SystemMonotonicClock())
 ```
 
 Async code can depend on `SleeperAsync` and use `SystemSleeperAsync`.
+Its `minimum_duration()` context pads successful work and ordinary errors, but propagates `asyncio.CancelledError` without waiting out the remaining duration. `MockSleeperAsync` follows the same rule without advancing its clock on cancellation.
 
 ## Measure Elapsed Time And Deadlines
 
-Use `Stopwatch` for elapsed-time measurement, `Deadline` as the injectable timeout contract, and `SystemDeadline` for a
-production monotonic deadline.
+Use `Stopwatch` for elapsed-time measurement, `Deadline` as the injectable timeout contract, and `SystemDeadline` for a production monotonic deadline.
 
 ```python
 from clock_pattern import Stopwatch, SystemDeadline, SystemMonotonicClock
@@ -140,16 +137,11 @@ with SystemDeadline(seconds=5, monotonic_clock=monotonic_clock):
     pass
 ```
 
-`SystemDeadline` context managers use `SIGALRM` to interrupt Python code and interruptible system calls. They require a
-Unix main thread, cannot be nested or replace an existing alarm, and may be delayed by C code that does not return
-control to the Python interpreter. Reading deadline properties or calling `raise_if_expired()` outside a context remains
-cooperative and works without signal interruption. When expiry is observed, `TimeoutExpiredError.elapsed_seconds`
-contains the measured elapsed duration as a float.
+`SystemDeadline` context managers use `SIGALRM` to interrupt Python code and interruptible system calls. They require a Unix main thread, cannot be nested or replace an existing alarm, and may be delayed by C code that does not return control to the Python interpreter. Reading deadline properties or calling `raise_if_expired()` outside a context remains cooperative and works without signal interruption. When expiry is observed, `TimeoutExpiredError.elapsed_seconds` contains the measured elapsed duration as a float.
 
 ## Poll And Retry
 
-Use `Poller` as the injectable contract and `SystemPoller` when the success condition is a predicate in production. It
-raises `TimeoutExpiredError` when the timeout expires.
+Use `Poller` as the injectable contract and `SystemPoller` when the success condition is a predicate in production. It raises `TimeoutExpiredError` when the timeout expires.
 
 ```python
 from clock_pattern import SystemMonotonicClock, SystemPoller, SystemSleeper
@@ -165,8 +157,9 @@ poller.poll_until(
 )
 ```
 
-Use `Retrier` as the injectable contract and `SystemRetrier` when an operation should be retried after configured
-exceptions. Successful falsey values are returned as-is; only exceptions trigger retries by default.
+Both pollers check time cooperatively after each condition evaluation. Success exactly at the timeout boundary is accepted; success after a positive timeout raises `TimeoutExpiredError`. A zero timeout performs one evaluation and accepts `True` without sleeping. Conditions themselves are not interrupted, so a condition that never returns can outlive the polling timeout. To bound an asynchronous condition that yields to the event loop, wrap the poll in `asyncio.timeout()`; that outer context raises the standard `TimeoutError` when its time limit expires.
+
+Use `Retrier` as the injectable contract and `SystemRetrier` when an operation should be retried after configured exceptions. Successful falsey values are returned as-is; only exceptions trigger retries by default.
 
 ```python
 from clock_pattern import SystemMonotonicClock, SystemRetrier, SystemSleeper
