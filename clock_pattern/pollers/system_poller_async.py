@@ -9,12 +9,13 @@ if version_info >= (3, 12):
 else:
     from typing_extensions import override  # pragma: no cover
 
+from asyncio import timeout
 from collections.abc import Awaitable, Callable
 from inspect import isawaitable
 
 from value_object_pattern.usables import BooleanValueObject, PositiveNumberValueObject, PositiveOrZeroNumberValueObject
 
-from clock_pattern.deadlines import SystemDeadline
+from clock_pattern.deadlines import SystemDeadline, TimeoutExpiredError
 from clock_pattern.monotonic_clocks.models import MonotonicClock
 from clock_pattern.pollers.models import PollerAsync
 from clock_pattern.sleepers.models import SleeperAsync
@@ -70,9 +71,10 @@ class SystemPollerAsync(PollerAsync):
         """
         Poll `condition` until it returns or awaits to `True`.
 
-        Conditions run cooperatively and are not interrupted. A successful result at the timeout boundary is
-        accepted, but a result after a positive timeout raises. A zero timeout evaluates the condition once.
-        Use an outer `asyncio.timeout()` when the condition itself must be cancelled after a time limit.
+        The timeout covers condition evaluation and sleeping, cancelling overdue awaits through asyncio. Blocking
+        synchronous code and coroutines that suppress cancellation cannot be forcibly interrupted. Injected-clock checks
+        also reject results after a positive timeout. A zero timeout allows one immediate evaluation, but cancels it if
+        it suspends. External cancellation and condition exceptions propagate.
 
         Args:
             condition (Callable[[], bool | Awaitable[bool]]): Sync or async condition checked until it is true.
@@ -104,6 +106,44 @@ class SystemPollerAsync(PollerAsync):
         PositiveNumberValueObject(value=interval_seconds, title='SystemPollerAsync', parameter='interval_seconds')
 
         deadline = SystemDeadline(seconds=timeout_seconds, monotonic_clock=self._monotonic_clock)
+
+        timeout_context = timeout(timeout_seconds)
+        try:
+            async with timeout_context:
+                await self._poll_until(
+                    condition=condition,
+                    deadline=deadline,
+                    timeout_seconds=timeout_seconds,
+                    interval_seconds=interval_seconds,
+                )
+
+        except TimeoutError as error:
+            if timeout_context.expired():
+                raise TimeoutExpiredError(elapsed_seconds=deadline.elapsed_seconds) from error
+
+            raise
+
+    async def _poll_until(
+        self,
+        *,
+        condition: Callable[[], bool | Awaitable[bool]],
+        deadline: SystemDeadline,
+        timeout_seconds: float,
+        interval_seconds: float,
+    ) -> None:
+        """
+        Poll using the injected clock while the enclosing asyncio timeout bounds awaits.
+
+        Args:
+            condition (Callable[[], bool | Awaitable[bool]]): Sync or async condition checked until it is true.
+            deadline (SystemDeadline): Deadline used to check for timeout expiration.
+            timeout_seconds (float): Maximum duration to wait.
+            interval_seconds (float): Duration between condition checks.
+
+        Raises:
+            TypeError: If `condition` does not return a boolean.
+            TimeoutExpiredError: If the timeout expires before `condition` returns `True`.
+        """
         while True:
             condition_result = condition()
 

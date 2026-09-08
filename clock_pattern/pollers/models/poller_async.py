@@ -41,8 +41,9 @@ class PollerAsync(ABC):
         """
         Poll a condition until it succeeds or the timeout expires.
 
-        Timeout checks are cooperative: conditions are not interrupted. Success at the boundary is accepted;
-        success after a positive timeout is rejected. A zero timeout evaluates the condition once.
+        The timeout covers condition evaluation and sleeping. Overdue awaits are cancelled; synchronous blocking code
+        cannot be interrupted. Conditions must propagate cancellation. Injected-clock checks reject success after a
+        positive timeout. A zero timeout permits one evaluation only if it completes without suspending.
 
         Args:
             condition (Callable[[], bool | Awaitable[bool]]): Sync or async condition checked until it succeeds.

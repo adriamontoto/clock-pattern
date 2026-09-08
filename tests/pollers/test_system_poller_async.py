@@ -2,11 +2,12 @@
 Test SystemPollerAsync poller.
 """
 
+from asyncio import CancelledError, Event, create_task, timeout
 from re import escape
 from typing import Any, cast
 from unittest.mock import AsyncMock, Mock
 
-from object_mother_pattern import FloatMother
+from object_mother_pattern import BooleanMother, FloatMother
 from pytest import mark, raises as assert_raises
 
 from clock_pattern.deadlines import TimeoutExpiredError
@@ -14,6 +15,159 @@ from clock_pattern.monotonic_clocks.testing import MockMonotonicClock
 from clock_pattern.pollers import PollerAsync, SystemPollerAsync
 from clock_pattern.sleepers.models import SleeperAsync
 from clock_pattern.sleepers.testing import MockSleeperAsync
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_poller_async_poll_until_method_cancels_hanging_condition_at_zero_timeout() -> None:
+    """
+    Test SystemPollerAsync cancels and cleans up a suspended condition at a zero timeout.
+    """
+    monotonic_clock = MockMonotonicClock()
+    sleeper = MockSleeperAsync(monotonic_clock=monotonic_clock)
+    cleaned_up = Event()
+
+    async def condition() -> bool:
+        try:
+            await Event().wait()
+            return True
+        finally:
+            cleaned_up.set()
+
+    async with timeout(1):
+        with assert_raises(
+            expected_exception=TimeoutExpiredError,
+            match=escape('Deadline expired after <<<0.0>>> seconds.'),
+        ) as exception_info:
+            await SystemPollerAsync(sleeper=sleeper, monotonic_clock=monotonic_clock).poll_until(
+                condition=condition,
+                timeout_seconds=0.0,
+            )
+
+    assert exception_info.value.elapsed_seconds == 0.0
+    assert cleaned_up.is_set()
+    sleeper.assert_sleep_method_was_not_called()
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_poller_async_poll_until_method_cancels_hanging_condition_at_positive_timeout() -> None:
+    """
+    Test SystemPollerAsync cancels and cleans up a suspended condition at a positive timeout.
+    """
+    monotonic_clock = MockMonotonicClock()
+    sleeper = MockSleeperAsync(monotonic_clock=monotonic_clock)
+    cleaned_up = Event()
+
+    async def condition() -> bool:
+        try:
+            await Event().wait()
+            return True
+
+        finally:
+            cleaned_up.set()
+
+    async with timeout(1):
+        with assert_raises(
+            expected_exception=TimeoutExpiredError,
+            match=escape('Deadline expired after <<<0.0>>> seconds.'),
+        ) as exception_info:
+            await SystemPollerAsync(sleeper=sleeper, monotonic_clock=monotonic_clock).poll_until(
+                condition=condition,
+                timeout_seconds=0.001,
+            )
+
+    assert exception_info.value.elapsed_seconds == 0.0
+    assert cleaned_up.is_set()
+    sleeper.assert_sleep_method_was_not_called()
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_poller_async_poll_until_method_cancels_hanging_sleeper() -> None:
+    """
+    Test SystemPollerAsync bounds sleeping between condition checks with the same timeout.
+    """
+    sleeper = AsyncMock(spec=SleeperAsync)
+    cleaned_up = Event()
+
+    async def sleep(*, seconds: float) -> None:
+        try:
+            await Event().wait()
+
+        finally:
+            cleaned_up.set()
+
+    sleeper.sleep.side_effect = sleep
+
+    async with timeout(1):
+        with assert_raises(
+            expected_exception=TimeoutExpiredError,
+            match=escape('Deadline expired after <<<0.0>>> seconds.'),
+        ):
+            await SystemPollerAsync(sleeper=sleeper, monotonic_clock=MockMonotonicClock()).poll_until(
+                condition=lambda: False,
+                timeout_seconds=0.001,
+            )
+
+    assert cleaned_up.is_set()
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_poller_async_poll_until_method_preserves_external_cancellation() -> None:
+    """
+    Test SystemPollerAsync propagates caller cancellation without converting it to a polling timeout.
+    """
+    started = Event()
+    cleaned_up = Event()
+    monotonic_clock = MockMonotonicClock()
+
+    async def condition() -> bool:
+        started.set()
+        try:
+            await Event().wait()
+            return True
+
+        finally:
+            cleaned_up.set()
+
+    poller = SystemPollerAsync(
+        sleeper=MockSleeperAsync(monotonic_clock=monotonic_clock),
+        monotonic_clock=monotonic_clock,
+    )
+    async with timeout(1):
+        task = create_task(poller.poll_until(condition=condition, timeout_seconds=10))
+        await started.wait()
+        task.cancel()
+        with assert_raises(
+            expected_exception=CancelledError,
+            match='^$',
+        ):
+            await task
+
+    assert cleaned_up.is_set()
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_poller_async_poll_until_method_preserves_condition_timeout_error() -> None:
+    """
+    Test SystemPollerAsync preserves a condition's TimeoutError without treating it as the poller's timeout.
+    """
+    monotonic_clock = MockMonotonicClock()
+    error = TimeoutError('upstream timed out')
+
+    with assert_raises(
+        expected_exception=TimeoutError,
+        match=escape('upstream timed out'),
+    ) as exception_info:
+        await SystemPollerAsync(
+            sleeper=MockSleeperAsync(monotonic_clock=monotonic_clock),
+            monotonic_clock=monotonic_clock,
+        ).poll_until(condition=AsyncMock(side_effect=error), timeout_seconds=1)
+
+    assert exception_info.value is error
 
 
 @mark.unit_testing
@@ -125,10 +279,9 @@ async def test_system_poller_async_poll_until_method_caps_sleep_after_awaitable_
 
 @mark.unit_testing
 @mark.asyncio
-@mark.parametrize('asynchronous', (False, True))
-async def test_system_poller_async_poll_until_method_rejects_success_after_timeout(*, asynchronous: bool) -> None:
+async def test_system_poller_async_poll_until_method_rejects_sync_success_after_timeout() -> None:
     """
-    Test a slow sync or async successful condition cannot bypass the timeout.
+    Test SystemPollerAsync rejects a successful sync condition after the timeout.
     """
     monotonic_clock = MockMonotonicClock()
     sleeper = MockSleeperAsync(monotonic_clock=monotonic_clock)
@@ -137,15 +290,37 @@ async def test_system_poller_async_poll_until_method_rejects_success_after_timeo
         monotonic_clock.advance(seconds=2)
         return True
 
-    async def condition_async() -> bool:
-        return condition()
+    with assert_raises(
+        expected_exception=TimeoutExpiredError,
+        match=escape('Deadline expired after <<<2.0>>> seconds.'),
+    ):
+        await SystemPollerAsync(sleeper=sleeper, monotonic_clock=monotonic_clock).poll_until(
+            condition=condition,
+            timeout_seconds=1,
+        )
+
+    sleeper.assert_sleep_method_was_not_called()
+
+
+@mark.unit_testing
+@mark.asyncio
+async def test_system_poller_async_poll_until_method_rejects_async_success_after_timeout() -> None:
+    """
+    Test SystemPollerAsync rejects a successful async condition after the timeout.
+    """
+    monotonic_clock = MockMonotonicClock()
+    sleeper = MockSleeperAsync(monotonic_clock=monotonic_clock)
+
+    async def condition() -> bool:
+        monotonic_clock.advance(seconds=2)
+        return True
 
     with assert_raises(
         expected_exception=TimeoutExpiredError,
         match=escape('Deadline expired after <<<2.0>>> seconds.'),
     ):
         await SystemPollerAsync(sleeper=sleeper, monotonic_clock=monotonic_clock).poll_until(
-            condition=condition_async if asynchronous else condition,
+            condition=condition,
             timeout_seconds=1,
         )
 
@@ -229,7 +404,10 @@ async def test_system_poller_async_poll_until_method_propagates_condition_except
     exception = RuntimeError('condition failed')
     condition = AsyncMock(side_effect=exception)
 
-    with assert_raises(expected_exception=RuntimeError, match=escape('condition failed')) as exception_info:
+    with assert_raises(
+        expected_exception=RuntimeError,
+        match=escape('condition failed'),
+    ) as exception_info:
         await SystemPollerAsync(sleeper=sleeper, monotonic_clock=monotonic_clock).poll_until(
             condition=condition,
             timeout_seconds=1,
@@ -252,7 +430,10 @@ async def test_system_poller_async_poll_until_method_propagates_sleeper_exceptio
     sleeper.sleep.side_effect = exception
     condition = AsyncMock(return_value=False)
 
-    with assert_raises(expected_exception=RuntimeError, match=escape('sleep failed')) as exception_info:
+    with assert_raises(
+        expected_exception=RuntimeError,
+        match=escape('sleep failed'),
+    ) as exception_info:
         await SystemPollerAsync(sleeper=sleeper, monotonic_clock=monotonic_clock).poll_until(
             condition=condition,
             timeout_seconds=1,
@@ -315,12 +496,13 @@ async def test_system_poller_async_condition_invalid_return_type() -> None:
     """
     Test SystemPollerAsync poll_until requires an exact boolean condition result.
     """
-    condition = cast(Any, AsyncMock(return_value=1))
+    condition_result = BooleanMother.invalid_type()
+    condition = AsyncMock(return_value=condition_result)
 
     with assert_raises(
         expected_exception=TypeError,
-        match=escape('SystemPollerAsync condition <<<1>>> must be a boolean. Got <<<int>>> type.'),
-    ):
+        match=escape(f'SystemPollerAsync condition <<<{condition_result}>>> must be a boolean. Got <<<{type(condition_result).__name__}>>> type.'),  # noqa: E501
+    ):  # fmt: skip
         monotonic_clock = MockMonotonicClock()
         await SystemPollerAsync(
             sleeper=MockSleeperAsync(monotonic_clock=monotonic_clock),
@@ -338,11 +520,8 @@ async def test_system_poller_async_timeout_seconds_invalid_type() -> None:
 
     with assert_raises(
         expected_exception=TypeError,
-        match=escape(
-            f'SystemPollerAsync timeout_seconds <<<{timeout_seconds}>>> must be an integer or float. '
-            f'Got <<<{type(timeout_seconds).__name__}>>> type.'
-        ),
-    ):
+        match=escape(f'SystemPollerAsync timeout_seconds <<<{timeout_seconds}>>> must be an integer or float. Got <<<{type(timeout_seconds).__name__}>>> type.'),  # noqa: E501
+    ):  # fmt: skip
         monotonic_clock = MockMonotonicClock()
         await SystemPollerAsync(
             sleeper=MockSleeperAsync(monotonic_clock=monotonic_clock),
@@ -360,10 +539,8 @@ async def test_system_poller_async_timeout_seconds_negative_random_value() -> No
 
     with assert_raises(
         expected_exception=ValueError,
-        match=escape(
-            f'SystemPollerAsync timeout_seconds <<<{timeout_seconds}>>> must be greater than or equal to zero.'
-        ),
-    ):
+        match=escape(f'SystemPollerAsync timeout_seconds <<<{timeout_seconds}>>> must be greater than or equal to zero.'),  # noqa: E501
+    ):  # fmt: skip
         monotonic_clock = MockMonotonicClock()
         await SystemPollerAsync(
             sleeper=MockSleeperAsync(monotonic_clock=monotonic_clock),
@@ -433,10 +610,8 @@ async def test_system_poller_async_timeout_seconds_positive_infinity_value() -> 
 
     with assert_raises(
         expected_exception=ValueError,
-        match=escape(
-            f'SystemPollerAsync timeout_seconds <<<{timeout_seconds}>>> must be finite and representable as a float.'
-        ),
-    ):
+        match=escape(f'SystemPollerAsync timeout_seconds <<<{timeout_seconds}>>> must be finite and representable as a float.'),  # noqa: E501
+    ):  # fmt: skip
         monotonic_clock = MockMonotonicClock()
         await SystemPollerAsync(
             sleeper=MockSleeperAsync(monotonic_clock=monotonic_clock),
@@ -454,10 +629,8 @@ async def test_system_poller_async_timeout_seconds_negative_infinity_value() -> 
 
     with assert_raises(
         expected_exception=ValueError,
-        match=escape(
-            f'SystemPollerAsync timeout_seconds <<<{timeout_seconds}>>> must be finite and representable as a float.'
-        ),
-    ):
+        match=escape(f'SystemPollerAsync timeout_seconds <<<{timeout_seconds}>>> must be finite and representable as a float.'),  # noqa: E501
+    ):  # fmt: skip
         monotonic_clock = MockMonotonicClock()
         await SystemPollerAsync(
             sleeper=MockSleeperAsync(monotonic_clock=monotonic_clock),
@@ -475,10 +648,8 @@ async def test_system_poller_async_timeout_seconds_nan_value() -> None:
 
     with assert_raises(
         expected_exception=ValueError,
-        match=escape(
-            f'SystemPollerAsync timeout_seconds <<<{timeout_seconds}>>> must be finite and representable as a float.'
-        ),
-    ):
+        match=escape(f'SystemPollerAsync timeout_seconds <<<{timeout_seconds}>>> must be finite and representable as a float.'),  # noqa: E501
+    ):  # fmt: skip
         monotonic_clock = MockMonotonicClock()
         await SystemPollerAsync(
             sleeper=MockSleeperAsync(monotonic_clock=monotonic_clock),
@@ -496,11 +667,8 @@ async def test_system_poller_async_interval_seconds_invalid_type() -> None:
 
     with assert_raises(
         expected_exception=TypeError,
-        match=escape(
-            f'SystemPollerAsync interval_seconds <<<{interval_seconds}>>> must be an integer or float. '
-            f'Got <<<{type(interval_seconds).__name__}>>> type.'
-        ),
-    ):
+        match=escape(f'SystemPollerAsync interval_seconds <<<{interval_seconds}>>> must be an integer or float. Got <<<{type(interval_seconds).__name__}>>> type.'),  # noqa: E501
+    ):  # fmt: skip
         monotonic_clock = MockMonotonicClock()
         await SystemPollerAsync(
             sleeper=MockSleeperAsync(monotonic_clock=monotonic_clock),
@@ -619,10 +787,8 @@ async def test_system_poller_async_interval_seconds_positive_infinity_value() ->
 
     with assert_raises(
         expected_exception=ValueError,
-        match=escape(
-            f'SystemPollerAsync interval_seconds <<<{interval_seconds}>>> must be finite and representable as a float.'
-        ),
-    ):
+        match=escape(f'SystemPollerAsync interval_seconds <<<{interval_seconds}>>> must be finite and representable as a float.'),  # noqa: E501
+    ):  # fmt: skip
         monotonic_clock = MockMonotonicClock()
         await SystemPollerAsync(
             sleeper=MockSleeperAsync(monotonic_clock=monotonic_clock),
@@ -644,10 +810,8 @@ async def test_system_poller_async_interval_seconds_negative_infinity_value() ->
 
     with assert_raises(
         expected_exception=ValueError,
-        match=escape(
-            f'SystemPollerAsync interval_seconds <<<{interval_seconds}>>> must be finite and representable as a float.'
-        ),
-    ):
+        match=escape(f'SystemPollerAsync interval_seconds <<<{interval_seconds}>>> must be finite and representable as a float.'),  # noqa: E501
+    ):  # fmt: skip
         monotonic_clock = MockMonotonicClock()
         await SystemPollerAsync(
             sleeper=MockSleeperAsync(monotonic_clock=monotonic_clock),
@@ -669,10 +833,8 @@ async def test_system_poller_async_interval_seconds_nan_value() -> None:
 
     with assert_raises(
         expected_exception=ValueError,
-        match=escape(
-            f'SystemPollerAsync interval_seconds <<<{interval_seconds}>>> must be finite and representable as a float.'
-        ),
-    ):
+        match=escape(f'SystemPollerAsync interval_seconds <<<{interval_seconds}>>> must be finite and representable as a float.'),  # noqa: E501
+    ):  # fmt: skip
         monotonic_clock = MockMonotonicClock()
         await SystemPollerAsync(
             sleeper=MockSleeperAsync(monotonic_clock=monotonic_clock),

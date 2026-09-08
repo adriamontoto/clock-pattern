@@ -33,8 +33,7 @@ from clock_pattern import (
 ## Wall-Clock Time
 
 - `Clock` is the abstract contract for `now() -> datetime` and `today() -> date`.
-- `UtcClock()` is the default production choice for persistence, messages, logs, audit fields, and cross-service
-  timestamps.
+- `UtcClock()` is the default production choice for persistence, messages, logs, audit fields, and cross-service timestamps.
 - `SystemClock(timezone='Area/City')` reads system time in a configured timezone.
 - `SystemClock()` defaults to UTC.
 - `SystemClock.timezone` exposes the configured `tzinfo`.
@@ -77,8 +76,7 @@ class LogicalClock(Clock):
 ## Sleepers
 
 - `Sleeper.sleep(seconds=...)` replaces direct `time.sleep()`.
-- `Sleeper.minimum_duration(seconds=...)` returns a sync context manager that sleeps for the remaining duration when the
-  block completes too quickly.
+- `Sleeper.minimum_duration(seconds=...)` returns a sync context manager that sleeps for the remaining duration when the block completes too quickly.
 - `SleeperAsync.sleep(seconds=...)` replaces direct `asyncio.sleep()`.
 - `SleeperAsync.minimum_duration(seconds=...)` returns an async context manager.
 - `SystemSleeper` and `SystemSleeperAsync` are production implementations.
@@ -101,8 +99,7 @@ use_case = UseCase(sleeper=SystemSleeper(monotonic_clock=SystemMonotonicClock())
 
 ## Monotonic Time
 
-Use `MonotonicClock.current_seconds() -> float` and `SystemMonotonicClock()` for elapsed-duration behavior. Monotonic
-time is not affected by wall-clock changes, DST changes, or timezone boundaries.
+Use `MonotonicClock.current_seconds() -> float` and `SystemMonotonicClock()` for elapsed-duration behavior. Monotonic time is not affected by wall-clock changes, DST changes, or timezone boundaries.
 
 ## Stopwatch
 
@@ -148,11 +145,10 @@ except TimeoutExpiredError as error:
 
 Use `Poller` as the injectable contract. In production, construct a `SystemMonotonicClock`, inject it into a
 `SystemSleeper` and `SystemPoller`, then call
-`poller.poll_until(condition=..., timeout_seconds=..., interval_seconds=0.1)` when success is a predicate. It raises
-`TimeoutExpiredError` when the timeout expires.
+`poller.poll_until(condition=..., timeout_seconds=..., interval_seconds=0.1)` when success is a predicate. It raises `TimeoutExpiredError` when the timeout expires.
 
-Use `PollerAsync` as the async contract and `SystemPollerAsync` as its production implementation. Inject a
-`SystemSleeperAsync` and their shared monotonic clock. The async poller accepts sync or async conditions.
+Use `PollerAsync` as the async contract and `SystemPollerAsync` as its production implementation. Inject a `SystemSleeperAsync` and their shared monotonic clock. The async poller accepts sync or async conditions.
+Its timeout covers the entire poll and cancels overdue awaits, raising `TimeoutExpiredError`. Synchronous blocking code cannot be interrupted, and conditions must propagate cancellation. External cancellation and condition exceptions are preserved. Zero timeout permits immediate evaluation but cancels on suspension. Injected-clock checks still apply; the cancellation timer uses the event loop's clock, while error elapsed seconds come from the injected clock.
 
 ## Retrying
 

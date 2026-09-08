@@ -94,8 +94,7 @@ deadline.raise_if_expired()
 deadline.assert_raise_if_expired_method_was_called_once()
 ```
 
-As a context manager, `MockDeadline` rejects an already-expired entry and checks expiry after a successful body. Tests
-can call `advance()` inside the context to exercise timeout handling without real signals or waiting.
+As a context manager, `MockDeadline` rejects an already-expired entry and checks expiry after a successful body. Tests can call `advance()` inside the context to exercise timeout handling without real signals or waiting.
 
 ## Mock Pollers And Retriers
 
@@ -109,8 +108,7 @@ poller = MockPoller()
 retrier = MockRetrier()
 ```
 
-These test doubles implement `Poller` / `PollerAsync` and `Retrier` / `RetrierAsync`. They record method calls and can
-be prepared to raise exceptions or return values, depending on the class.
+These test doubles implement `Poller` / `PollerAsync` and `Retrier` / `RetrierAsync`. They record method calls and can be prepared to raise exceptions or return values, depending on the class.
 
 ## Testing Checklist
 
@@ -119,5 +117,4 @@ be prepared to raise exceptions or return values, depending on the class.
 - Use mock clocks for interaction assertions.
 - Use mock monotonic clocks for elapsed-duration tests.
 - Use mock deadlines, sleepers, pollers, and retriers to avoid real waiting or repeated work in unit tests.
-- Avoid real `SystemClock`, `UtcClock`, `SystemSleeper`, real polling, and real retrying in unit tests for business
-  logic.
+- Avoid real `SystemClock`, `UtcClock`, `SystemSleeper`, real polling, and real retrying in unit tests for business logic.

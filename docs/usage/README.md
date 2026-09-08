@@ -157,7 +157,11 @@ poller.poll_until(
 )
 ```
 
-Both pollers check time cooperatively after each condition evaluation. Success exactly at the timeout boundary is accepted; success after a positive timeout raises `TimeoutExpiredError`. A zero timeout performs one evaluation and accepts `True` without sleeping. Conditions themselves are not interrupted, so a condition that never returns can outlive the polling timeout. To bound an asynchronous condition that yields to the event loop, wrap the poll in `asyncio.timeout()`; that outer context raises the standard `TimeoutError` when its time limit expires.
+`SystemPoller` checks time cooperatively after each condition evaluation. Success exactly at the timeout boundary is accepted; success after a positive timeout raises `TimeoutExpiredError`. A zero timeout performs one evaluation. Synchronous conditions cannot be interrupted.
+
+`SystemPollerAsync` also uses an asyncio timeout covering the entire poll, including awaited conditions and sleeps. An overdue await is cancelled and raises `TimeoutExpiredError`; no outer timeout wrapper is needed. A zero timeout allows one immediate evaluation but cancels it if it suspends. Blocking synchronous code and coroutines that suppress cancellation cannot be forcibly interrupted. Caller cancellation and exceptions raised by the condition propagate unchanged, including a condition's own `TimeoutError`.
+
+The injected monotonic clock still drives cooperative checks and `TimeoutExpiredError.elapsed_seconds`. The asyncio cancellation timer uses the event loop's clock. With a frozen mock clock, that reported elapsed duration can remain zero when the real event-loop timeout fires. At an exact boundary, immediate success can win only before cancellation is delivered.
 
 Use `Retrier` as the injectable contract and `SystemRetrier` when an operation should be retried after configured exceptions. Successful falsey values are returned as-is; only exceptions trigger retries by default.
 
