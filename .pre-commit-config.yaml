@@ -51,7 +51,7 @@ repos:
           - pre-commit
 
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: d910b66e2686a3ef6c3f438dec0f63ba3cf8d7ee # v4.18.0
+    rev: 3f5ccc87b27966d9ed21cf5ea8ec2fba38ca65ce # v4.19.0
     hooks:
       - id: commitizen
         name: 📝 Standard Commit Message Checker
