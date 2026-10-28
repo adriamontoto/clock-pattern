@@ -77,6 +77,9 @@ all = [
 
 [tool.uv]
 exclude-newer = '7 days'
+# TODO: Remove this cutoff and constraint once virtualenv 21.14.13 is older than the cooldown.
+exclude-newer-package = { virtualenv = '2026-10-23T00:00:00Z' }
+constraint-dependencies = ['virtualenv==21.14.13']
 index-strategy = 'first-index'
 prerelease = 'if-necessary'
 preview = false
