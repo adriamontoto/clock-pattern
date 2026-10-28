@@ -82,7 +82,6 @@
 - Implement retriers
   ([`99bb631`](https://github.com/adriamontoto/clock-pattern/commit/99bb6314cd8ae22eb1fc7adc6168cbc2ad85981f))
 
-
 ## v0.9.0 (2026-08-23)
 
 ### ✨ Features
@@ -93,14 +92,12 @@
 - Implement stopwatch
   ([`572637f`](https://github.com/adriamontoto/clock-pattern/commit/572637f5b3cadfa007309556086409ef9b2f804e))
 
-
 ## v0.8.0 (2026-08-18)
 
 ### ✨ Features
 
 - Implement monotonic clock
   ([`2eeb586`](https://github.com/adriamontoto/clock-pattern/commit/2eeb5860768659fbee66095f9417608b6620d281))
-
 
 ## v0.7.0 (2026-05-20)
 
@@ -109,14 +106,12 @@
 - Introduce AGENTS.md
   ([`f4ad97e`](https://github.com/adriamontoto/clock-pattern/commit/f4ad97e1363f6fb3ccc50e0056d6ecc012861638))
 
-
 ## v0.6.0 (2025-12-10)
 
 ### ✨ Features
 
 - Support python 3.14
   ([`85c3c3f`](https://github.com/adriamontoto/clock-pattern/commit/85c3c3f6fd7c69c276e2fb950bef09670f6d00e4))
-
 
 ## v0.5.0 (2025-06-23)
 
@@ -125,14 +120,12 @@
 - Improve package imports
   ([`30a5c71`](https://github.com/adriamontoto/clock-pattern/commit/30a5c71cfcc15520239c8bd1f1efabc0ce673bb8))
 
-
 ## v0.4.0 (2025-06-21)
 
 ### ✨ Features
 
 - Implement mock clock
   ([`0876d5b`](https://github.com/adriamontoto/clock-pattern/commit/0876d5bcead93748ec855d87eec260b8d3677c38))
-
 
 ## v0.3.0 (2025-06-21)
 
@@ -141,14 +134,12 @@
 - Implement fixed time clock
   ([`d4aab23`](https://github.com/adriamontoto/clock-pattern/commit/d4aab23e6910a22e76064954faeb58f0d13e471b))
 
-
 ## v0.2.0 (2025-06-21)
 
 ### ✨ Features
 
 - Implement UTC clock
   ([`f61d1e5`](https://github.com/adriamontoto/clock-pattern/commit/f61d1e57d5fe02a9c48e2882446b14a417ab7cc7))
-
 
 ## v0.1.0 (2025-06-21)
 
