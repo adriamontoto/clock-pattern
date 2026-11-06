@@ -2,6 +2,32 @@
 
 <!-- version list -->
 
+## v0.12.0 (2026-11-06)
+
+### 📦 Build System
+
+- Add configuration for uv tool decencies management
+  ([`7b006a8`](https://github.com/adriamontoto/clock-pattern/commit/7b006a8966d0be46262f8ade84f9e2465c1e69cd))
+
+- Harden uv execution
+  ([`8447395`](https://github.com/adriamontoto/clock-pattern/commit/8447395196a373830504c5ffe0c5d390a76e7059))
+
+### 🤖 Continuous Integration
+
+- Bump the actions-minor-patch group with 2 updates
+  ([#101](https://github.com/adriamontoto/clock-pattern/pull/101),
+  [`b357ee4`](https://github.com/adriamontoto/clock-pattern/commit/b357ee4786dbfd00cda4c92d8b3ed1f947d9c69b))
+
+### 📚 Documentation
+
+- **ci**: Correct generated changelog release spacing
+  ([`3c6c157`](https://github.com/adriamontoto/clock-pattern/commit/3c6c157807ffd863bc5d5375ffe6bc4028439f19))
+
+### ✨ Features
+
+- Bump to python3.15
+  ([`176d62e`](https://github.com/adriamontoto/clock-pattern/commit/176d62efe872b8afcae975c321f25295ad1d60be))
+
 ## v0.11.0 (2026-09-08)
 
 ### 📦 Build System
