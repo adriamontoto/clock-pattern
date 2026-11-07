@@ -2,6 +2,13 @@
 
 <!-- version list -->
 
+## v0.13.0 (2026-11-07)
+
+### ✨ Features
+
+- Remove python-dateutil dependency
+  ([`0d9ad0b`](https://github.com/adriamontoto/clock-pattern/commit/0d9ad0b5e6d319f4e3258942c440f0d8f4a9bf4d))
+
 ## v0.12.0 (2026-11-06)
 
 ### 📦 Build System
